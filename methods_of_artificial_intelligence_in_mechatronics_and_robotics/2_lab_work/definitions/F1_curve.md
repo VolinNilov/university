@@ -13,18 +13,16 @@
 ### Определение:
 F1-Score — это гармоническое среднее между **Precision** (точностью) и **Recall** (полнотой). Она измеряет баланс между этими двумя метриками:
 
-\[
-F1 = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}
-\]
+**F1 = 2 * (Precision * Recall) / (Precision + Recall)**
 
 - **Precision (точность)**: Доля правильно предсказанных объектов среди всех предсказанных объектов.
-  \[
-  \text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}}
-  \]
+
+   **Precision = TP / (TP + FP)**
+
 - **Recall (полнота)**: Доля правильно предсказанных объектов среди всех истинных объектов.
-  \[
-  \text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}}
-  \]
+   
+   **Recall = TP / (TP + FN)**
+
 
 F1-Score достигает максимального значения, когда Precision и Recall сбалансированы.
 
