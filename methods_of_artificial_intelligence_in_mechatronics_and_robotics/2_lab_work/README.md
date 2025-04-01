@@ -1,7 +1,5 @@
 # Проект: Обучение и инференс модели YOLOv8 для обнаружения пауков
 
-## Описание проекта
-
 Этот проект направлен на обучение модели YOLOv8 для обнаружения пауков на изображениях. Проект включает:
 - Подготовку датасета (изображения и метки).
 - Обучение модели с использованием библиотеки Ultralytics.
@@ -416,3 +414,14 @@ save_dir: path
 
     - [R](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/definitions/R_curve.md)
         ![R](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/vemous_spiders_big_yolov8n/R_curve.png)
+
+
+
+## Инференс модели
+Инференс модели **vemous_spidersyolov8n**: 
+![vemous_spidersyolov8n](https://s3.ezgif.com/tmp/ezgif-34041e605bdfd0.gif)
+***Неудачный опыт, как видно на кадрах выше, у модели плохо получается детектировать объекты на изображении***
+
+Инференс модели **vemous_spiders_big_yolov8n**:
+![vemous_spiders_big_yolov8n](https://s3.ezgif.com/tmp/ezgif-39da155f8a6d31.gif)
+***Удачный опыт, как видно на кадрах выше, у модели хорошо получается детектировать объекты на изображении. Видны оба класса и можно сделать вывод, что за исключением двойного обнаружения, модель ведёт себя прекрасно и выполняет свою работу)***
