@@ -52,9 +52,9 @@
 
 3. **Расчет метрик**:
    На основе матрицы ошибок можно рассчитать различные метрики:
-   - **Accuracy** (точность): `(TP + TN) / (TP + TN + FP + FN)`
-   - **Precision** (точность предсказания): `TP / (TP + FP)`
-   - **Recall** (полнота): `TP / (TP + FN)`
+   - **Accuracy** (точность): **(TP + TN) / (TP + TN + FP + FN)**
+   - **Precision** (точность предсказания): **TP / (TP + FP)**
+   - **Recall** (полнота): **TP / (TP + FN)**
    - **F1-Score**: гармоническое среднее между Precision и Recall.
 
 ## Как Ultralytics использует Confusion Matrix?
