@@ -374,4 +374,5 @@ save_dir: path
 
 Обе модели обучились и имеют следующие характеристики:
 - Модель на малой выборке данных - **vemous_spiders_yolov8n**:
-    
+    - Confusion Matrix Normalized - 
+        ![Confusion Matrix Normalized](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/vemous_spiders_yolov8n/confusion_matrix_normalized.png)
