@@ -18,26 +18,40 @@ C:.
 │   ├───spider_dataset/
 │   │   ├───test/
 │   │   │   ├───images/
+│   │   │   |   ├───...
 │   │   │   └───labels/
+│   │   │       └───...
 │   │   ├───train/
 │   │   │   ├───images/
+│   │   │   |   ├───...
 │   │   │   └───labels/
+│   │   │       └───...
 │   │   └───valid/
-│   │       ├───images/
-│   │       └───labels/
+│   │   │   ├───images/
+│   │   │   |   ├───...
+│   │   │   └───labels/
+│   │   │       └───...
 │   └───spider_dataset_102/
 │       ├───train/
 │       │   ├───images/
+│       │   |   ├───...
 │       │   └───labels/
+│       │       └───...
 │       └───val/
-│           ├───images/
-│           └───labels/
+│       │   ├───images/
+│       │   |   ├───...
+│       │   └───labels/
+│       │       └───...
 ├───models/
 │   ├───vemous_spiders_big_yolov8n/
 │   │   └───weights/
+│   │       └───...
 │   └───vemous_spiders_yolov8n/
 │       └───weights/
-├───inference/
+│           └───...
+├───definitions/
+│   ├───illustrations/
+│   └───...
 ├───inference.py
 ├───main.py
 ├───output_video.mp4
