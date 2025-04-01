@@ -392,6 +392,9 @@ save_dir: path
     - **R** [более подробно про эту характеристику можно прочитать тут, в справочных материал](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/definitions/R_curve.md)
         ![R](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/vemous_spiders_yolov8n/R_curve.png)
 
+    Результат характеристик для модели **vemous_spiders_yolov8n**:
+    ![vemous_spiders_yolov8n](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/vemous_spiders_yolov8n/results.png)
+
 - Модель на большой выборке данных - **vemous_spiders_big_yolov8n**:
     - **Confusion Matrix Normalized** [более подробно про эту характеристику можно прочитать тут, в справочных материал](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/definitions/confusion_matrix_normalized.md)
         ![Confusion Matrix Normalized](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/vemous_spiders_big_yolov8n/confusion_matrix_normalized.png)
@@ -414,6 +417,8 @@ save_dir: path
     - **R** [более подробно про эту характеристику можно прочитать тут, в справочных материал](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/definitions/R_curve.md)
         ![R](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/vemous_spiders_big_yolov8n/R_curve.png)
 
+    Результат характеристик для модели **vemous_spiders_big_yolov8n**:
+    ![vemous_spiders_big_yolov8n](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/vemous_spiders_big_yolov8n/results.png)
 
 
 ## Инференс модели
