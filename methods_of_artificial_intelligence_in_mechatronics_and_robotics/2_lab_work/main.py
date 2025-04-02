@@ -8,8 +8,7 @@ torch.backends.openmp.enabled = False
 model = YOLO("yolov8n.pt")
 
 model.train(
-    data="C:/Users/1/Desktop/Учёба/Караваев/Магистратура/1 Лабораторная работа/dataset/spider_dataset/data.yaml",       # Укажите путь к файлу конфигурации датасета
-    task=
+    data="D:/Projects/own/university/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/dataset/spiders_label_studio/data.yaml",
     epochs=500,                     # Количество эпох
     batch=-1,                       # Размер батча (или "auto" для автоматического выбора)
     imgsz=640,                      # Размер изображений
@@ -20,5 +19,5 @@ model.train(
     mosaic=1.0,                     # Использование Mosaic аугментации
     save=True,                      # Сохранение модели после обучения
     project="models",                # Папка для сохранения модели
-    name="vemous_spiders_big_yolov8n"   # Имя сохраненной модели
+    name="spiders_label_studio_yolov8n"   # Имя сохраненной модели
 )
