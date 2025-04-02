@@ -75,7 +75,7 @@ def main():
         print(f"Файл {file_path} удалён")
 
     infer = Inator(
-        model_path="models/vemous_spiders_big_yolov8n/weights/best.pt",
+        model_path="models/spiders_label_studio_yolov8n/weights/best.pt",
         test_images_path="dataset/spider_dataset/test/images"
     )
     

@@ -13,7 +13,7 @@ cache: false
 device: cuda
 workers: 0
 project: models
-name: spiders_label_studio_yolov8n
+name: spiders_label_studio_yolov8n2
 exist_ok: false
 pretrained: true
 optimizer: AdamW
@@ -103,4 +103,4 @@ erasing: 0.4
 crop_fraction: 1.0
 cfg: null
 tracker: botsort.yaml
-save_dir: models\spiders_label_studio_yolov8n
+save_dir: models\spiders_label_studio_yolov8n2

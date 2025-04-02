@@ -174,4 +174,5 @@ cython_debug/
 .pypirc
 
 yolov8n.pt
-/test
+yolo11n.pt
+/inference
