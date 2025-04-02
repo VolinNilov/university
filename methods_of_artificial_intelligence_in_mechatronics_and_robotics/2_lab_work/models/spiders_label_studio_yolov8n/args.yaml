@@ -1,7 +1,7 @@
 task: detect
 mode: train
 model: yolov8n.pt
-data: D:/Projects/own/university/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/dataset/spiders_label_studio/data.yaml
+data: path/data.yaml
 epochs: 500
 time: null
 patience: 60
