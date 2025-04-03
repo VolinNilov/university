@@ -43,7 +43,7 @@ output_plot_path = os.path.join(f"models/{model_name}", "class_distribution.png"
 plt.savefig(output_plot_path, dpi=300, bbox_inches='tight')
 print(f"График сохранен в файл: {output_plot_path}")
 
-plt.show()
+# plt.show()
 
 model = YOLO("yolov8n.pt")
 
