@@ -13,14 +13,11 @@ class Inator:
         self.test_images_path = test_images_path
         self.processed_images = []
 
-    def process_images(self, processed_dir: str, iou_threshold: float = 0.5, conf_threshold: float = 0.3) -> List[str]:
+    def process_images(self, processed_dir: str) -> List[str]:
         """
         Обрабатывает изображения из test_images_path с использованием модели YOLO.
         
         Возвращает список путей к обработанным изображениям.
-        Добавлены параметры для NMS:
-        - iou_threshold: порог IOU для фильтрации боксов.
-        - conf_threshold: минимальный порог уверенности для боксов.
         """
         image_paths = glob.glob(os.path.join(self.test_images_path, "*.jpg"))
         output_dir = processed_dir
@@ -31,36 +28,14 @@ class Inator:
         for img_path in image_paths:
             image = cv2.imread(img_path)
             results = self.model(image)
-
+            
             if results and len(results) > 0:
-                # Применяем NMS к результатам
-                boxes = results[0].boxes.xyxy.cpu().numpy()  # Координаты боксов
-                scores = results[0].boxes.conf.cpu().numpy()  # Уверенность
-                class_ids = results[0].boxes.cls.cpu().numpy()  # ID классов
-
-                # Фильтрация боксов с помощью NMS
-                indices = cv2.dnn.NMSBoxes(
-                    bboxes=boxes.tolist(), 
-                    scores=scores.tolist(), 
-                    score_threshold=conf_threshold, 
-                    nms_threshold=iou_threshold
-                )
-
-                # Оставляем только боксы, прошедшие NMS
-                filtered_boxes = [boxes[i] for i in indices.flatten()]
-                filtered_scores = [scores[i] for i in indices.flatten()]
-                filtered_class_ids = [class_ids[i] for i in indices.flatten()]
-
-                # Рисуем отфильтрованные боксы на изображении
-                for box, score, cls_id in zip(filtered_boxes, filtered_scores, filtered_class_ids):
-                    x1, y1, x2, y2 = map(int, box)
-                    label = f"{self.model.names[int(cls_id)]} {score:.2f}"
-                    color = (0, 255, 0)  # Цвет рамки
-                    cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
-                    cv2.putText(image, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-
+                image_with_boxes = results[0].plot()
+            else:
+                image_with_boxes = image
+            
             output_path = os.path.join(output_dir, os.path.basename(img_path))
-            cv2.imwrite(output_path, image)
+            cv2.imwrite(output_path, image_with_boxes)
             processed_image_paths.append(output_path)
         
         self.processed_images = processed_image_paths
@@ -100,14 +75,12 @@ def main():
         print(f"Файл {file_path} удалён")
 
     infer = Inator(
-        model_path="models/spiders_label_studio_yolov8n/weights/best.pt",
+        model_path="models/spiders_label_studio_yolov8n3/weights/best.pt",
         test_images_path="dataset/spider_dataset/test/images"
     )
     
     processed_images = infer.process_images(
-        processed_dir=data_path,
-        iou_threshold=0.5,  # Порог IOU для NMS
-        conf_threshold=0.5  # Минимальная уверенность для боксов
+        processed_dir = data_path
     )
 
     video_path = infer.create_video(

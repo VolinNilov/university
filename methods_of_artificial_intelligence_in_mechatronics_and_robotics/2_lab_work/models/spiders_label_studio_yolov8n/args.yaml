@@ -1,10 +1,10 @@
 task: detect
 mode: train
 model: yolov8n.pt
-data: path/data.yaml
-epochs: 500
+data: D:/Projects/university/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/dataset/spiders_label_studio\data.yaml
+epochs: 1000
 time: null
-patience: 60
+patience: 150
 batch: -1
 imgsz: 640
 save: true
@@ -13,7 +13,7 @@ cache: false
 device: cuda
 workers: 0
 project: models
-name: spiders_label_studio_yolov8n2
+name: spiders_label_studio_yolov8n3
 exist_ok: false
 pretrained: true
 optimizer: AdamW
@@ -103,4 +103,4 @@ erasing: 0.4
 crop_fraction: 1.0
 cfg: null
 tracker: botsort.yaml
-save_dir: models\spiders_label_studio_yolov8n2
+save_dir: models\spiders_label_studio_yolov8n3
