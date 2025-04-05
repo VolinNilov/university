@@ -117,9 +117,8 @@ C:.
 
 Инференс модели **spider_3_class**: 
 
-![spider_3_class без NMS](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/output_video/spiders_3_class/spiders_3_class_without_nms.mp4)
-
-![spider_3_class c NMS](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/output_video/spiders_3_class/spiders_3_class_with_nms.mp4)
+![spider_3_class без NMS](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/output_video/spiders_3_class/gif/spiders_3_class_without_nms.gif)
+![spider_3_class c NMS](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/output_video/spiders_3_class/gif/spiders_3_class_with_nms.gif)
 
 ***Распознование 3 классов пауков: Black Widow, Blue Tarantula, Bold Jumper***
 
