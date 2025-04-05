@@ -42,6 +42,7 @@
 Инференс модели **spider_3_class**: 
 
 ![spider_3_class без NMS](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/output_video/spiders_3_class/gif/spiders_3_class_without_nms.gif)
+
 ![spider_3_class c NMS](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/output_video/spiders_3_class/gif/spiders_3_class_with_nms.gif)
 
 ***Распознование 3 классов пауков: Black Widow, Blue Tarantula, Bold Jumper***
@@ -64,6 +65,7 @@
 ### Инференс модели [**vemous_spiders_big_yolov8n**](https://github.com/VolinNilov/university/tree/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/vemous_spiders_big_yolov8n):
 
 ![vemous_spiders_big_yolov8n results](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/vemous_spiders_big_yolov8n/results.png)
+
 ![vemous_spiders_big_yolov8n](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/definitions/illustrations/vemous_spiders_big_yolov8n.gif)
 
 ***Удачный опыт, как видно на кадрах выше, у модели хорошо получается детектировать объекты на изображении. Видны оба класса и можно сделать вывод, что за исключением двойного обнаружения, модель ведёт себя прекрасно и выполняет свою работу)***
