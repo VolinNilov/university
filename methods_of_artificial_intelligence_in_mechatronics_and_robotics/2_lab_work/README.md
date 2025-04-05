@@ -7,56 +7,9 @@
 - Создание видео из обработанных изображений.
 
 ## Содержание
-1. [Структура проекта](#структура-проекта)
-2. [Обучение модели](#обучение-модели)
-3. [Инференс модели](#инференс-модели)
-
-## Структура проекта
-``` bach
-C:.
-├───dataset/
-│   ├───spider_dataset/
-│   │   ├───test/
-│   │   │   ├───images/
-│   │   │   |   ├───...
-│   │   │   └───labels/
-│   │   │       └───...
-│   │   ├───train/
-│   │   │   ├───images/
-│   │   │   |   ├───...
-│   │   │   └───labels/
-│   │   │       └───...
-│   │   └───valid/
-│   │   │   ├───images/
-│   │   │   |   ├───...
-│   │   │   └───labels/
-│   │   │       └───...
-│   └───spider_dataset_102/
-│       ├───train/
-│       │   ├───images/
-│       │   |   ├───...
-│       │   └───labels/
-│       │       └───...
-│       └───val/
-│       │   ├───images/
-│       │   |   ├───...
-│       │   └───labels/
-│       │       └───...
-├───models/
-│   ├───vemous_spiders_big_yolov8n/
-│   │   └───weights/
-│   │       └───...
-│   └───vemous_spiders_yolov8n/
-│       └───weights/
-│           └───...
-├───definitions/
-│   ├───illustrations/
-│   └───...
-├───inference.py
-├───main.py
-├───output_video.mp4
-└───yolov8n.pt
-```
+1. [Обучение модели](#обучение-модели)
+2. [Инференс модели](#инференс-модели)
+3. [Побочные модели. Модели распознающие ядовитых и не ядовитых пауков](#побочные-модели.-Модели-распознающие-ядовитых-и-не-ядовитых-пауков)
 
 ## Обучение модели
 Для обучения модели используйте файл main.py.
@@ -90,7 +43,7 @@ C:.
 ***Видео можно посмотреть тут: [видео](https://github.com/VolinNilov/university/tree/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/output_video/spiders_3_class/video)***
 
 
-## Побочные модели. Модели распознающие ядовитых и не ядовитых пауков:
+## Побочные модели. Модели распознающие ядовитых и не ядовитых пауков
 
 ### Инференс модели [**vemous_spiders_yolov8n**](https://github.com/VolinNilov/university/tree/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/vemous_spiders_yolov8n): 
 
