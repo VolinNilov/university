@@ -51,6 +51,7 @@
 Результат обучения для модели **vemous_spiders_yolov8n**:
 
 ![vemous_spiders_yolov8n results](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/vemous_spiders_yolov8n/results.png)
+
 ![vemous_spiders_yolov8n](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/definitions/illustrations/vemous_spiders_yolov8n.gif)
 
 ***Неудачный опыт, как видно на кадрах выше, у модели плохо получается детектировать объекты на изображении***
