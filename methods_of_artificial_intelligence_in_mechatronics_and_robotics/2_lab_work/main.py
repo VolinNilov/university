@@ -4,12 +4,16 @@ import os
 import re
 from collections import defaultdict
 import matplotlib.pyplot as plt
+from dotenv import load_dotenv
+
+load_dotenv()
 
 torch.backends.openmp.enabled = False
 
-dataset_dir = "D:/Projects/university/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/dataset/spider_dataset"
+dataset_dir = os.getenv("dataset_dir")
 dataset_name = re.split(r'[\\/]', dataset_dir)[-1]
-model_name = "vemous_spiders_big_yolov8n"
+model_name = os.getenv("model_name")
+labels_dir = os.path.join(dataset_dir, "train", "labels")
 
 def analyze_dataset(labels_dir):
     class_counts = defaultdict(int)
@@ -23,7 +27,6 @@ def analyze_dataset(labels_dir):
                     class_counts[class_id] += 1
     return class_counts
 
-labels_dir = os.path.join(dataset_dir, "train", "labels")
 class_counts = analyze_dataset(labels_dir)
 
 print(f"Количество аннотаций по классам для модели {model_name} из датасета {dataset_name}:")
@@ -41,23 +44,25 @@ plt.title(f'Распределение аннотаций по классам д
 plt.xticks(classes)
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 
+plt.show()
+
+model = YOLO("yolov8n.pt")
+
+model.train(
+    data=os.path.join(dataset_dir, "data.yaml"),
+    epochs=1000,
+    batch=-1,
+    imgsz=640,
+    device="cuda",
+    optimizer="AdamW",
+    patience=150,
+    workers=0,
+    mosaic=1.0,
+    save=True,
+    project="models",
+    name=model_name
+)
+
 output_plot_path = os.path.join(f"models/{model_name}", "class_distribution.png")
 plt.savefig(output_plot_path, dpi=300, bbox_inches='tight')
 print(f"График сохранен в файл: {output_plot_path}")
-
-# model = YOLO("yolov8n.pt")
-
-# model.train(
-#     data=os.path.join(dataset_dir, "data.yaml"),
-#     epochs=1000,
-#     batch=-1,
-#     imgsz=640,
-#     device="cuda",
-#     optimizer="AdamW",
-#     patience=150,
-#     workers=0,
-#     mosaic=1.0,
-#     save=True,
-#     project="models",
-#     name=model_name
-# )

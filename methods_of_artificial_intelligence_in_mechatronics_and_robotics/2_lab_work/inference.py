@@ -2,12 +2,31 @@ import cv2
 import torch
 import os
 import glob
+import shutil
+import re
+import numpy as np
 from ultralytics import YOLO
 from typing import List
-import shutil
+from dotenv import load_dotenv
 
-class Inator:
+
+# Глобальная переменная для цвета подложки (чёрный цвет)
+BACKGROUND_COLOR = (0, 0, 0)  # BGR формат
+TEXT_COLOR = (255, 255, 255)  # Белый цвет для текста
+
+# Загрузка переменных окружения из .env файла
+load_dotenv()
+
+# Извлечение имени датасета из пути
+dataset_name = re.split(r'[\\/]', os.getenv("dataset_dir"))[-1]
+
+class InatorBase:
     def __init__(self, model_path: str, test_images_path: str):
+        """
+        Конструктор класса. Инициализирует модель YOLO и устройство (GPU или CPU).
+        :param model_path: Путь к весам модели.
+        :param test_images_path: Путь к тестовым изображениям.
+        """
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model = YOLO(model_path).to(self.device)
         self.test_images_path = test_images_path
@@ -15,29 +34,31 @@ class Inator:
 
     def process_images(self, processed_dir: str) -> List[str]:
         """
-        Обрабатывает изображения из test_images_path с использованием модели YOLO.
-        
+        Обрабатывает изображения и сохраняет их в указанную директорию.
         Возвращает список путей к обработанным изображениям.
+        :param processed_dir: Директория для сохранения обработанных изображений.
+        :return: Список путей к обработанным изображениям.
         """
+        # Получаем список всех изображений в формате .jpg
         image_paths = glob.glob(os.path.join(self.test_images_path, "*.jpg"))
-        output_dir = processed_dir
-        os.makedirs(output_dir, exist_ok=True)
-        
+        os.makedirs(processed_dir, exist_ok=True)  # Создаем директорию для сохранения
+
         processed_image_paths = []
-        
         for img_path in image_paths:
-            image = cv2.imread(img_path)
-            results = self.model(image)
-            
+            image = cv2.imread(img_path)  # Чтение изображения
+            results = self.model(image)  # Детекция объектов
+
+            # Если есть результаты, рисуем боксы
             if results and len(results) > 0:
                 image_with_boxes = results[0].plot()
             else:
                 image_with_boxes = image
-            
-            output_path = os.path.join(output_dir, os.path.basename(img_path))
+
+            # Сохраняем обработанное изображение
+            output_path = os.path.join(processed_dir, os.path.basename(img_path))
             cv2.imwrite(output_path, image_with_boxes)
             processed_image_paths.append(output_path)
-        
+
         self.processed_images = processed_image_paths
         return processed_image_paths
 
@@ -45,50 +66,206 @@ class Inator:
         """
         Создаёт видео из обработанных изображений и сохраняет его в output_video_path.
         Возвращает путь к созданному видеофайлу.
+        :param fps: Количество кадров в секунду.
+        :param output_video_path: Путь для сохранения видеофайла.
+        :return: Путь к созданному видеофайлу.
         """
         if not self.processed_images:
             raise ValueError("Нет обработанных изображений. Сначала вызовите process_images().")
-        
-        first_image = cv2.imread(self.processed_images[0])
-        height, width, _ = first_image.shape
-        
+
+        # Определяем размеры подложки и обработанного изображения
+        background_size = (900, 900)  # Размер подложки
+        processed_image_size = (640, 640)  # Размер обработанного изображения
+
+        # Вычисляем координаты для размещения обработанного изображения по центру
+        x_offset = (background_size[0] - processed_image_size[0]) // 2
+        y_offset = (background_size[1] - processed_image_size[1]) // 2
+
+        # Создаем директорию для видео, если её нет
+        os.makedirs(os.path.dirname(output_video_path), exist_ok=True)
+
+        # Инициализация видеозаписи
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-        video_writer = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
-        
+        video_writer = cv2.VideoWriter(output_video_path, fourcc, fps, background_size)
+
         for img_path in self.processed_images:
-            frame = cv2.imread(img_path)
-            video_writer.write(frame)
-        
+            # Читаем обработанное изображение
+            processed_image = cv2.imread(img_path)
+
+            # Масштабируем изображение до размера 640x640 (если оно не такого размера)
+            processed_image = cv2.resize(processed_image, processed_image_size)
+
+            # Создаем чёрную подложку
+            background = np.full((background_size[1], background_size[0], 3), BACKGROUND_COLOR, dtype=np.uint8)
+
+            # Накладываем обработанное изображение на подложку
+            background[y_offset:y_offset + processed_image_size[1], x_offset:x_offset + processed_image_size[0]] = processed_image
+
+            # Получаем информацию о классах и confidence для текущего изображения
+            results = self.model(cv2.imread(img_path))
+            if results and len(results) > 0:
+                boxes = results[0].boxes.xyxy.cpu().numpy()  # Координаты боксов
+                scores = results[0].boxes.conf.cpu().numpy()  # Уверенность
+                class_ids = results[0].boxes.cls.cpu().numpy()  # ID классов
+
+                # Формируем текст для вывода
+                text_lines = []
+                for score, cls_id in zip(scores, class_ids):
+                    class_name = self.model.names[int(cls_id)]
+                    text_lines.append(f"{class_name}: {score:.2f}")
+
+                # Добавляем текст в левый верхний угол
+                y_text = 30  # Начальная позиция текста по оси Y
+                for line in text_lines:
+                    cv2.putText(
+                        background,
+                        line,
+                        (10, y_text),  # Позиция текста (10 пикселей от левого края)
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.7,  # Размер шрифта
+                        TEXT_COLOR,
+                        2  # Толщина текста
+                    )
+                    y_text += 30  # Сдвигаем следующую строку ниже
+
+            # Записываем кадр в видео
+            video_writer.write(background)
+
         video_writer.release()
         return output_video_path
 
+
+class InatorNMS(InatorBase):
+    def process_images(self, processed_dir: str, iou_threshold: float = 0.5, conf_threshold: float = 0.3) -> List[str]:
+        """
+        Обрабатывает изображения с применением NMS и сохраняет их в указанную директорию.
+        Возвращает список путей к обработанным изображениям.
+        :param processed_dir: Директория для сохранения обработанных изображений.
+        :param iou_threshold: Порог IOU для фильтрации боксов.
+        :param conf_threshold: Минимальный порог уверенности для боксов.
+        :return: Список путей к обработанным изображениям.
+        """
+        image_paths = glob.glob(os.path.join(self.test_images_path, "*.jpg"))
+        os.makedirs(processed_dir, exist_ok=True)  # Создаем директорию для сохранения
+
+        processed_image_paths = []
+        for img_path in image_paths:
+            image = cv2.imread(img_path)
+            results = self.model(image)
+
+            if results and len(results) > 0:
+                # Применяем NMS к результатам
+                boxes = results[0].boxes.xyxy.cpu().numpy()  # Координаты боксов
+                scores = results[0].boxes.conf.cpu().numpy()  # Уверенность
+                class_ids = results[0].boxes.cls.cpu().numpy()  # ID классов
+
+                # Фильтрация боксов с помощью NMS
+                nms_results = cv2.dnn.NMSBoxes(
+                    bboxes=boxes.tolist(),
+                    scores=scores.tolist(),
+                    score_threshold=conf_threshold,
+                    nms_threshold=iou_threshold
+                )
+
+                # Проверяем, что результат не пустой
+                if isinstance(nms_results, tuple):  # Если возвращается кортеж
+                    if len(nms_results) == 0:  # Если кортеж пуст
+                        indices = []  # Нет индексов для фильтрации
+                    else:
+                        indices = nms_results[0]  # Берем первый элемент (список индексов)
+                else:  # Если возвращается массив (старые версии OpenCV)
+                    indices = nms_results
+
+                # Преобразуем индексы в плоский список
+                indices = indices.flatten() if hasattr(indices, 'flatten') else indices
+
+                # Если есть индексы, фильтруем боксы
+                if len(indices) > 0:
+                    filtered_boxes = [boxes[i] for i in indices]
+                    filtered_scores = [scores[i] for i in indices]
+                    filtered_class_ids = [class_ids[i] for i in indices]
+
+                    # Рисуем отфильтрованные боксы на изображении
+                    for box, score, cls_id in zip(filtered_boxes, filtered_scores, filtered_class_ids):
+                        x1, y1, x2, y2 = map(int, box)
+                        label = f"{self.model.names[int(cls_id)]} {score:.2f}"
+                        color = (0, 255, 0)  # Цвет рамки
+                        cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
+                        cv2.putText(image, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                else:
+                    print(f"Нет подходящих боксов для изображения: {img_path}")
+
+            # Сохраняем обработанное изображение
+            output_path = os.path.join(processed_dir, os.path.basename(img_path))
+            cv2.imwrite(output_path, image)
+            processed_image_paths.append(output_path)
+
+        self.processed_images = processed_image_paths
+        return processed_image_paths
+
+def process_and_create_video(inator, data_path, video_path, use_nms=False):
+    print("[START] Старт обработки изображений:")
+    if use_nms:
+        processed_images = inator.process_images(data_path, iou_threshold=0.4, conf_threshold=0.3)
+    else:
+        processed_images = inator.process_images(data_path)
+    print("[END] Конец обработки изображений.")
+
+    print("[START] Старт создания видео:")
+    video_path = inator.create_video(fps=1, output_video_path=video_path)
+    print(f"[END] Видео создано: {video_path}")
+
+
 def main():
-    data_path = "inference"
-    file_path = "output_video.mp4"
+    model_name = os.getenv("model_name")
+    dataset_dir = os.getenv("dataset_dir")
+    dataset_name = re.split(r'[\\/]', dataset_dir)[-1]
 
-    if os.path.exists(data_path) and os.path.isdir(data_path):
-        shutil.rmtree(data_path)
-        print(f"Папка {data_path} удалена")
-    
-    if os.path.exists(file_path):
-        os.remove(file_path)
-        print(f"Файл {file_path} удалён")
+    # Определение путей
+    inference_with_nms_dir = f"inference/{model_name}/with_nms/{dataset_name}"
+    inference_without_nms_dir = f"inference/{model_name}/without_nms/{dataset_name}"
+    output_video_dir = f"output_video/{model_name}"
 
-    infer = Inator(
-        model_path="models/spiders_label_studio_yolov8n3/weights/best.pt",
-        test_images_path="dataset/spider_dataset/test/images"
+    # Удаление старых данных
+    for path in [inference_with_nms_dir, inference_without_nms_dir, output_video_dir]:
+        if os.path.exists(path):
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+                print(f"Папка {path} удалена")
+            else:
+                os.remove(path)
+                print(f"Файл {path} удален")
+
+    # Создание необходимых директорий
+    os.makedirs(inference_with_nms_dir, exist_ok=True)
+    os.makedirs(inference_without_nms_dir, exist_ok=True)
+    os.makedirs(output_video_dir, exist_ok=True)
+
+    test_images_path = f"dataset/{dataset_name}/test/images"
+    model_path = f"models/{model_name}/weights/best.pt"
+
+    # Обработка без NMS
+    print("=" * 150)
+    print(f"Запуск создания видео для модели {model_name} без NMS")
+    print("=" * 150)
+    inator = InatorBase(model_path, test_images_path)
+    process_and_create_video(
+        inator,
+        inference_without_nms_dir,
+        f"{output_video_dir}/{model_name}_without_nms.mp4"
     )
-    
-    processed_images = infer.process_images(
-        processed_dir = data_path
-    )
 
-    video_path = infer.create_video(
-        fps=1,
-        output_video_path=file_path
+    # Обработка с NMS
+    print("=" * 150)
+    print(f"Запуск создания видео для модели {model_name} с NMS")
+    print("=" * 150)
+    inator_nms = InatorNMS(model_path, test_images_path)
+    process_and_create_video(
+        inator_nms,
+        inference_with_nms_dir,
+        f"{output_video_dir}/{model_name}_with_nms.mp4",
+        use_nms=True
     )
-
-    print(f"\nВидео создано: {video_path}")
 
 if __name__ == "__main__":
     main()
