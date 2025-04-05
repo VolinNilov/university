@@ -32,7 +32,12 @@
 ## Инференс модели
 
 Результат обучения для модели **spider_3_class**:
+
 ![spider_3_class](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/spiders_3_class/results.png)
+
+Распределение по классам в модели:
+
+![Распределение по классам](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/spiders_3_class/labels.jpg)
 
 Инференс модели **spider_3_class**: 
 
