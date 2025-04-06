@@ -1,4 +1,4 @@
-# Theory of experiments in systems research - ToEiSR
+# Methods of artificial intelligence in mechatronics and robotics - MoAIiMR
 # Задания к лабораторным работам
 
 ## Содержание
