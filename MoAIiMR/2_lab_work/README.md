@@ -14,59 +14,59 @@
 ## Обучение модели
 Для обучения модели используйте файл main.py.
 Также более подробно про характеристики модели можно прочитать тут:
-- **Confusion Matrix Normalized** [более подробно про эту характеристику можно прочитать тут, в справочных материал](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/definitions/confusion_matrix_normalized.md)
+- **Confusion Matrix Normalized** [более подробно про эту характеристику можно прочитать тут, в справочных материал](https://github.com/VolinNilov/university/blob/main/MoAIiMR/2_lab_work/definitions/confusion_matrix_normalized.md)
 
-- **Confusion Matrix** [более подробно про эту характеристику можно прочитать тут, в справочных материал](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/definitions/confusion_matrix.md)
+- **Confusion Matrix** [более подробно про эту характеристику можно прочитать тут, в справочных материал](https://github.com/VolinNilov/university/blob/main/MoAIiMR/2_lab_work/definitions/confusion_matrix.md)
 
-- **Lasbles Correlogram** [более подробно про эту характеристику можно прочитать тут, в справочных материал](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/definitions/labels_correlogram.md)
+- **Lasbles Correlogram** [более подробно про эту характеристику можно прочитать тут, в справочных материал](https://github.com/VolinNilov/university/blob/main/MoAIiMR/2_lab_work/definitions/labels_correlogram.md)
 
-- **F1** [более подробно про эту характеристику можно прочитать тут, в справочных материал](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/definitions/F1_curve.md)
+- **F1** [более подробно про эту характеристику можно прочитать тут, в справочных материал](https://github.com/VolinNilov/university/blob/main/MoAIiMR/2_lab_work/definitions/F1_curve.md)
 
-- **PR** [более подробно про эту характеристику можно прочитать тут, в справочных материал](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/definitions/PR_curve.md)
+- **PR** [более подробно про эту характеристику можно прочитать тут, в справочных материал](https://github.com/VolinNilov/university/blob/main/MoAIiMR/2_lab_work/definitions/PR_curve.md)
 
-- **P** [более подробно про эту характеристику можно прочитать тут, в справочных материал](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/definitions/P_curve.md)
+- **P** [более подробно про эту характеристику можно прочитать тут, в справочных материал](https://github.com/VolinNilov/university/blob/main/MoAIiMR/2_lab_work/definitions/P_curve.md)
 
-- **R** [более подробно про эту характеристику можно прочитать тут, в справочных материал](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/definitions/R_curve.md)
+- **R** [более подробно про эту характеристику можно прочитать тут, в справочных материал](https://github.com/VolinNilov/university/blob/main/MoAIiMR/2_lab_work/definitions/R_curve.md)
 
 
 ## Инференс модели
 
 Результат обучения для модели **spider_3_class**:
 
-![spider_3_class](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/spiders_3_class/results.png)
+![spider_3_class](https://github.com/VolinNilov/university/blob/main/MoAIiMR/2_lab_work/models/spiders_3_class/results.png)
 
 Распределение по классам в модели:
 
-![Распределение по классам](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/spiders_3_class/labels.jpg)
+![Распределение по классам](https://github.com/VolinNilov/university/blob/main/MoAIiMR/2_lab_work/models/spiders_3_class/labels.jpg)
 
 Инференс модели **spider_3_class**: 
 
-![spider_3_class без NMS](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/output_video/spiders_3_class/gif/spiders_3_class_without_nms.gif)
+![spider_3_class без NMS](https://github.com/VolinNilov/university/blob/main/MoAIiMR/2_lab_work/output_video/spiders_3_class/gif/spiders_3_class_without_nms.gif)
 
-![spider_3_class c NMS](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/output_video/spiders_3_class/gif/spiders_3_class_with_nms.gif)
+![spider_3_class c NMS](https://github.com/VolinNilov/university/blob/main/MoAIiMR/2_lab_work/output_video/spiders_3_class/gif/spiders_3_class_with_nms.gif)
 
 ***Распознование 3 классов пауков: Black Widow, Blue Tarantula, Bold Jumper***
-***Видео можно посмотреть тут: [видео](https://github.com/VolinNilov/university/tree/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/output_video/spiders_3_class/video)***
+***Видео можно посмотреть тут: [видео](https://github.com/VolinNilov/university/tree/main/MoAIiMR/2_lab_work/output_video/spiders_3_class/video)***
 
 
 ## Побочные модели
 ### Модели распознающие ядовитых и не ядовитых пауков
 
-### Инференс модели [**vemous_spiders_yolov8n**](https://github.com/VolinNilov/university/tree/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/vemous_spiders_yolov8n): 
+### Инференс модели [**vemous_spiders_yolov8n**](https://github.com/VolinNilov/university/tree/main/MoAIiMR/2_lab_work/models/vemous_spiders_yolov8n): 
 
 Результат обучения для модели **vemous_spiders_yolov8n**:
 
-![vemous_spiders_yolov8n results](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/vemous_spiders_yolov8n/results.png)
+![vemous_spiders_yolov8n results](https://github.com/VolinNilov/university/blob/main/MoAIiMR/2_lab_work/models/vemous_spiders_yolov8n/results.png)
 
-![vemous_spiders_yolov8n](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/definitions/illustrations/vemous_spiders_yolov8n.gif)
+![vemous_spiders_yolov8n](https://github.com/VolinNilov/university/blob/main/MoAIiMR/2_lab_work/definitions/illustrations/vemous_spiders_yolov8n.gif)
 
 ***Неудачный опыт, как видно на кадрах выше, у модели плохо получается детектировать объекты на изображении***
 
-### Инференс модели [**vemous_spiders_big_yolov8n**](https://github.com/VolinNilov/university/tree/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/vemous_spiders_big_yolov8n):
+### Инференс модели [**vemous_spiders_big_yolov8n**](https://github.com/VolinNilov/university/tree/main/MoAIiMR/2_lab_work/models/vemous_spiders_big_yolov8n):
 
-![vemous_spiders_big_yolov8n results](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/models/vemous_spiders_big_yolov8n/results.png)
+![vemous_spiders_big_yolov8n results](https://github.com/VolinNilov/university/blob/main/MoAIiMR/2_lab_work/models/vemous_spiders_big_yolov8n/results.png)
 
-![vemous_spiders_big_yolov8n](https://github.com/VolinNilov/university/blob/main/methods_of_artificial_intelligence_in_mechatronics_and_robotics/2_lab_work/definitions/illustrations/vemous_spiders_big_yolov8n.gif)
+![vemous_spiders_big_yolov8n](https://github.com/VolinNilov/university/blob/main/MoAIiMR/2_lab_work/definitions/illustrations/vemous_spiders_big_yolov8n.gif)
 
 ***Удачный опыт, как видно на кадрах выше, у модели хорошо получается детектировать объекты на изображении. Видны оба класса и можно сделать вывод, что за исключением двойного обнаружения, модель ведёт себя прекрасно и выполняет свою работу)***
 
