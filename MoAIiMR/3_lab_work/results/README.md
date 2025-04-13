@@ -28,4 +28,4 @@ eval_interval = 1000  # @param {type:"integer"}
 ```
 
 ### Результат
-[Первый результат](https://github.com/VolinNilov/university/blob/main/MoAIiMR/3_lab_work/results/dqn/dqn_1.mp4)
+[Первый результат](https://github.com/VolinNilov/university/blob/main/MoAIiMR/3_lab_work/results/dqn/dqn_1.gif)
