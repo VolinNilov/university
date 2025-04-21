@@ -34,6 +34,6 @@
 ## Результаты работы. Интерфейс программы 
 Примеры расчёта в графическом интерфейсе программы ```main.py```, написанной в качестве анлога для представленной в варианте лабораторной работы программы на ```matlab```. Пример работы:
 
-![Интерфейс программы]()
-![Расчёт данных]()
-![Расчёт данных и построение графика]()
+![Интерфейс программы](https://github.com/VolinNilov/university/blob/main/ToEiSR/1_lab_work/interface/program_interface.png)
+![Расчёт данных](https://github.com/VolinNilov/university/blob/main/ToEiSR/1_lab_work/interface/calculating_data.png)
+![Расчёт данных и построение графика](https://github.com/VolinNilov/university/blob/main/ToEiSR/1_lab_work/interface/data_calculation_and_graph_plotting.png)
