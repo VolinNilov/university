@@ -10,7 +10,7 @@
 
 
 ### Код обучения в Google Colab
-Код доступен [тут](https://colab.research.google.com/drive/1wx-zzvTblN3TFUeS1LBR7oYgto4fKCs6?usp=sharing)
+Код доступен в [Google Colab](https://colab.research.google.com/drive/1wx-zzvTblN3TFUeS1LBR7oYgto4fKCs6?usp=sharing)
 
 
 ### Результат обучения на 10000 итераций и генерация видео основанной на 100 эпизодах 
