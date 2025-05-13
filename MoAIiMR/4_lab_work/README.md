@@ -21,13 +21,13 @@
 ![100000 итераций и 100 эпизодов](https://github.com/VolinNilov/university/blob/main/MoAIiMR/4_lab_work/results/mountaincar_dqn_100000_100.gif)
 
 ### Результат обучения на 100000 итераций и генерация видео основанной на 1000 эпизодах 
-![100000 итераций и 100 эпизодов](https://github.com/VolinNilov/university/blob/main/MoAIiMR/4_lab_work/results/mountaincar_dqn_100000_1000.gif)
+![100000 итераций и 1000 эпизодов](https://github.com/VolinNilov/university/blob/main/MoAIiMR/4_lab_work/results/mountaincar_dqn_100000_1000.gif)
 
 ### Результат обучения на 100000 итераций и генерация видео основанной на 10000 эпизодах 
-![100000 итераций и 100 эпизодов](https://github.com/VolinNilov/university/blob/main/MoAIiMR/4_lab_work/results/mountaincar_dqn_100000_10000.gif)
+![100000 итераций и 10000 эпизодов](https://github.com/VolinNilov/university/blob/main/MoAIiMR/4_lab_work/results/mountaincar_dqn_100000_10000.gif)
 
 ### Результат обучения на 100000 итераций и генерация видео основанной на 100000 эпизодах 
-![100000 итераций и 100 эпизодов](https://github.com/VolinNilov/university/blob/main/MoAIiMR/4_lab_work/results/mountaincar_dqn_100000_100000.gif)
+![100000 итераций и 100000 эпизодов](https://github.com/VolinNilov/university/blob/main/MoAIiMR/4_lab_work/results/mountaincar_dqn_100000_100000.gif)
 
 
 ### Ответы на контрольные вопросы
