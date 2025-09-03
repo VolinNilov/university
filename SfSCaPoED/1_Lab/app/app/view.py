@@ -81,7 +81,7 @@ class AnimationWidget(QWidget):
             not isinstance(self.y_data, (list, np.ndarray)) or len(self.y_data) == 0):
             print("[AnimationWidget] paintEvent: Нет данных для отрисовки")
             return
-        
+
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         
@@ -90,39 +90,66 @@ class AnimationWidget(QWidget):
         height = self.height()
         margin = 20
         
+        # --- Отладочный вывод масштаба и смещения ---
+        print(f"[paintEvent Debug] Widget size: {width}x{height}, margin: {margin}")
+        print(f"[paintEvent Debug] self.radius: {self.radius}")
+        
         # Масштабирование (простое, можно улучшить)
         max_coord = self.radius * 1.2
         if max_coord == 0: max_coord = 1
         scale = min((width - 2*margin), (height - 2*margin)) / (2 * max_coord)
         
+        # --- Отладочный вывод scale ---
+        print(f"[paintEvent Debug] max_coord: {max_coord}, scale: {scale}")
+        
         # Центр координат (внизу посередине, как в примере лекции)
         center_x = width // 2
         center_y = height - margin - 50 # Немного выше нижней границы
+        
+        # --- Отладочный вывод центра ---
+        print(f"[paintEvent Debug] center: ({center_x}, {center_y})")
 
         # Рисуем ограничение (например, окружность)
         pen = QPen(QColor("lightgray"), 2, Qt.PenStyle.SolidLine)
         painter.setPen(pen)
-        painter.drawEllipse(
-            int(center_x - self.radius * scale),
-            int(center_y - self.radius * scale),
-            int(2 * self.radius * scale),
-            int(2 * self.radius * scale)
-        )
+        circle_top_left_x = int(center_x - self.radius * scale)
+        circle_top_left_y = int(center_y - self.radius * scale)
+        circle_width = int(2 * self.radius * scale)
+        circle_height = int(2 * self.radius * scale)
+        # --- Отладочный вывод окружности ---
+        print(f"[paintEvent Debug] Circle rect: ({circle_top_left_x}, {circle_top_left_y}, {circle_width}, {circle_height})")
+        painter.drawEllipse(circle_top_left_x, circle_top_left_y, circle_width, circle_height)
 
         # Рисуем траекторию
         pen = QPen(QColor("lightblue"), 1, Qt.PenStyle.SolidLine)
         painter.setPen(pen)
-        for i in range(1, min(self.current_index + 1, len(self.x_data))):
+        # Ограничиваем количество рисуемых сегментов для отладки, если нужно
+        num_segments_to_draw = min(self.current_index + 1, 10) # Например, только первые 10
+        num_segments_to_draw = self.current_index + 1
+        for i in range(1, min(num_segments_to_draw, len(self.x_data))):
             x1 = center_x + int(self.x_data[i-1] * scale)
             y1 = center_y - int(self.y_data[i-1] * scale) # Инвертируем Y
             x2 = center_x + int(self.x_data[i] * scale)
             y2 = center_y - int(self.y_data[i] * scale)
+            # --- Отладочный вывод первых нескольких точек траектории ---
+            if i < 5:
+                print(f"[paintEvent Debug] Trajectory segment {i}: ({x1}, {y1}) -> ({x2}, {y2})")
             painter.drawLine(x1, y1, x2, y2)
 
         # Рисуем объект (шарик)
         if 0 <= self.current_index < len(self.x_data):
-            obj_x = center_x + int(self.x_data[self.current_index] * scale)
-            obj_y = center_y - int(self.y_data[self.current_index] * scale) # Инвертируем Y
+            obj_x_unscaled = self.x_data[self.current_index]
+            obj_y_unscaled = self.y_data[self.current_index]
+            obj_x = center_x + int(obj_x_unscaled * scale)
+            obj_y = center_y - int(obj_y_unscaled * scale) # Инвертируем Y
+            
+            # --- Отладочный вывод координат объекта ---
+            print(f"[paintEvent Debug] Object raw coords: ({obj_x_unscaled}, {obj_y_unscaled})")
+            print(f"[paintEvent Debug] Object scaled coords: ({obj_x}, {obj_y})")
+            
+            # Проверка, находится ли объект в пределах виджета (грубая)
+            if not (0 <= obj_x <= width and 0 <= obj_y <= height):
+                print(f"[paintEvent Debug] WARNING: Object is likely outside widget bounds!")
             
             pen = QPen(QColor("red"), 2, Qt.PenStyle.SolidLine)
             painter.setPen(pen)
@@ -138,6 +165,12 @@ class AnimationWidget(QWidget):
             if 0 <= self.current_index < len(self.t_data):
                 time_str = f"t={self.t_data[self.current_index]:.3f}s"
             painter.drawText(obj_x + 10, obj_y, time_str)
+            # --- Отладочный вывод текста ---
+            # print(f"[paintEvent Debug] Drawing text '{time_str}' at ({obj_x + 10}, {obj_y})")
+
+        # --- Отладочный вывод в конце ---
+        print(f"[paintEvent Debug] Frame for index {self.current_index} drawn.")
+
 
 class MainWindow(QMainWindow):
     """Главное окно приложения."""
