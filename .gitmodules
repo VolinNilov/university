@@ -1,0 +1,3 @@
+[submodule "SfSCaPoED/DifferentialEquationSolverForStudents"]
+	path = SfSCaPoED/DifferentialEquationSolverForStudents
+	url = https://github.com/AntonKlekovkin/DifferentialEquationSolverForStudents.git
