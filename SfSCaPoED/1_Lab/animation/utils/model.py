@@ -2,18 +2,10 @@ import numpy as np
 
 class PendulumMotionModel:
     """
-    Модель движения шарика по дуге окружности под действием силы тяжести.
-    Уравнения получены по методу Лагранжа 1 рода с учетом вязкого трения.
-    См. пример в лекции (стр. 9).
+    Модель движения шарика по дуге окружности под действием силы тяжести
     """
     def __init__(self, radius, gravity=9.81, friction_coeff=0.1, mass=1.0):
-        """
-        Args:
-            radius (float): Радиус окружности.
-            gravity (float): Ускорение свободного падения.
-            friction_coeff (float): Коэффициент вязкого трения.
-            mass (float): Масса шарика.
-        """
+
         self.R = radius
         self.g = gravity
         self.b = friction_coeff
@@ -30,6 +22,7 @@ class PendulumMotionModel:
         Returns:
             np.array: Производные [vx, vy, ax, ay].
         """
+        
         x, y, vx, vy = state
 
         # Вычисление множителя Лагранжа lambda (см. лекцию стр. 9)

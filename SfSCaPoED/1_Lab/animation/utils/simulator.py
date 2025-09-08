@@ -4,7 +4,7 @@ import csv
 from pathlib import Path
 
 class MotionSimulator:
-    """Класс для запуска симуляций с разными решателями и сравнения результатов."""
+    """Класс для запуска симуляций с разными решателями и сравнения результатов"""
     
     def __init__(self, model, output_dir_name="data"):
         """
@@ -12,10 +12,11 @@ class MotionSimulator:
             model: Модель движения (например, PendulumMotionModel).
             output_dir_name (str): Имя директории для сохранения результатов (относительно скрипта).
         """
+
         self.model = model
         self.results = {}
         
-        # Получаем путь к директории, где находится main.py (на один уровень выше utils)
+        # Получаем путь к директории, где находится main.py
         script_dir = Path(__file__).parent.parent.resolve()
         self.output_dir = script_dir / output_dir_name
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -32,6 +33,7 @@ class MotionSimulator:
             dt (float): Шаг времени.
             label (str): Метка для идентификации результата.
         """
+
         t, sol = solver.solve(self.model.equations_of_motion, initial_conditions, t_span, dt)
         x, y, vx, vy = sol[:, 0], sol[:, 1], sol[:, 2], sol[:, 3]
         self.results[label] = {'t': t, 'x': x, 'y': y, 'vx': vx, 'vy': vy}
@@ -41,6 +43,7 @@ class MotionSimulator:
         """
         Строит все требуемые графики ЛР1: x(t), y(t), vx(t), vy(t), y(x).
         """
+
         if not self.results:
             print("[Simulator] Нет результатов для отображения.")
             return
@@ -119,7 +122,8 @@ class MotionSimulator:
         plt.show()
 
     def save_results_to_csv(self):
-        """Сохраняет все результаты в отдельные CSV файлы."""
+        """Сохраняет все результаты в отдельные CSV файлы"""
+
         for label, data in self.results.items():
             # Очищаем имя файла от недопустимых символов
             safe_label = "".join(c for c in label if c.isalnum() or c in (' ','.','_','-')).rstrip()
@@ -138,6 +142,7 @@ class MotionSimulator:
         Печатает сравнение результатов относительно эталонного решения.
         Сравнивает конечные координаты.
         """
+        
         if ref_label not in self.results:
             print(f"[Simulator] Эталонное решение '{ref_label}' не найдено.")
             return

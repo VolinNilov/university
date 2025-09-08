@@ -2,18 +2,18 @@ import sys
 import os
 import numpy as np
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 from utils.solvers import EulerMethod, HeunMethod, RungeKutta4Method
 from utils.model import PendulumMotionModel
 from utils.simulator import MotionSimulator
 from PyQt6.QtCore import QObject, pyqtSignal
 
-# Добавляем корневую директорию проекта в путь поиска модулей
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 class AppModel(QObject):
     """
     Модель для MVC-приложения. Управляет данными и логикой расчетов.
     """
+
     # Сигналы для уведомления View/Controller об изменениях
     calculationFinished = pyqtSignal(dict) # Передает результаты расчетов
     calculationStarted = pyqtSignal()
@@ -26,11 +26,13 @@ class AppModel(QObject):
         self.results = {}
 
     def set_parameters(self, params):
-        """Устанавливает параметры модели из словаря."""
+        """Устанавливает параметры модели из словаря"""
+
         self.params = params
 
     def run_calculations(self):
-        """Запускает расчеты на основе установленных параметров."""
+        """Запускает расчеты на основе установленных параметров"""
+        
         try:
             self.calculationStarted.emit()
             

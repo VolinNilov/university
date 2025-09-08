@@ -12,6 +12,7 @@ DEFAULT_PARAMS = {
     'dt_fine': 0.005
 }
 
+# Стили для Qt
 STYLESHEET = """
 QGroupBox {
     font-weight: bold;

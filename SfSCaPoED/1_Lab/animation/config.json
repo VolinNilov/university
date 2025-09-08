@@ -1,0 +1,24 @@
+{
+    "model": {
+        "radius": 5.0,
+        "gravity": 9.81,
+        "friction_coeff": 0.2,
+        "mass": 0.5
+    },
+    "initial_conditions": {
+        "angle_rad": 0.1,
+        "vx0": 0.0,
+        "vy0": 0.0
+    },
+    "simulation": {
+        "t_start": 0.0,
+        "t_end": 5.0,
+        "dt_coarse": 0.05,
+        "dt_fine": 0.005
+    },
+    "animation": {
+        "save_gif": false,
+        "gif_filename": "animation.gif",
+        "fps": 30
+    }
+}

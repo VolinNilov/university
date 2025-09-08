@@ -1,9 +1,9 @@
 import numpy as np
 from abc import ABC, abstractmethod
 
-# --- Интерфейс для численных решателей ---
 class ODESolver(ABC):
-    """Абстрактный базовый класс для численных решателей ОДУ."""
+    """Абстрактный базовый класс для численных решателей ОДУ"""
+
     @abstractmethod
     def solve(self, equations_of_motion, initial_conditions, t_span, dt):
         """
@@ -23,9 +23,9 @@ class ODESolver(ABC):
         """
         pass
 
-# --- Конкретные реализации решателей ---
 class EulerMethod(ODESolver):
-    """Реализация метода Эйлера."""
+    """Реализация метода Эйлера"""
+
     def solve(self, equations_of_motion, initial_conditions, t_span, dt):
         t_start, t_end = t_span
         num_steps = int((t_end - t_start) / dt) + 1
@@ -41,7 +41,8 @@ class EulerMethod(ODESolver):
         return t, sol
 
 class HeunMethod(ODESolver):
-    """Реализация метода Хьюна (предиктор-корректор)."""
+    """Реализация метода Хьюна (предиктор-корректор)"""
+
     def solve(self, equations_of_motion, initial_conditions, t_span, dt):
         t_start, t_end = t_span
         num_steps = int((t_end - t_start) / dt) + 1
@@ -64,7 +65,8 @@ class HeunMethod(ODESolver):
         return t, sol
 
 class RungeKutta4Method(ODESolver):
-    """Реализация метода Рунге-Кутты 4-го порядка."""
+    """Реализация метода Рунге-Кутты 4-го порядка"""
+
     def solve(self, equations_of_motion, initial_conditions, t_span, dt):
         t_start, t_end = t_span
         num_steps = int((t_end - t_start) / dt) + 1

@@ -1,8 +1,9 @@
 # main.py
 import sys
 from PyQt6.QtWidgets import QApplication
-from app.controller import AppController
-from app.resources import STYLESHEET
+# Импортируем из пакета gui
+from utils.gui.controller import AppController
+from utils.gui.resources import STYLESHEET
 
 def main():
     app = QApplication(sys.argv)

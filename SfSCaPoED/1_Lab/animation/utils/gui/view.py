@@ -11,7 +11,8 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import numpy as np
 
 class InputGroupBox(QGroupBox):
-    """Группа для ввода параметров."""
+    """Группа для ввода параметров"""
+
     def __init__(self, title, parent=None):
         super().__init__(title, parent)
         layout = QFormLayout()
@@ -21,7 +22,8 @@ class InputGroupBox(QGroupBox):
         self.layout().addRow(QLabel(label_text), widget)
 
 class PlotCanvas(FigureCanvas):
-    """Холст для matplotlib."""
+    """Холст для matplotlib"""
+
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         fig = plt.Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
@@ -29,17 +31,18 @@ class PlotCanvas(FigureCanvas):
         self.setParent(parent)
 
 class AnimationWidget(QWidget):
-    """Виджет для анимации."""
+    """Виджет для анимации"""
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setMinimumSize(400, 400)
         self.setStyleSheet("background-color: white; border: 1px solid gray;")
         
-        self.x_data = []
-        self.y_data = []
-        self.t_data = []
+        self.x_data = np.array([])
+        self.y_data = np.array([])
+        self.t_data = np.array([])
         self.current_index = 0
-        self.radius = 1.0
+        self.radius = 1.0 # Для отрисовки ограничения
         
         # Таймер для анимации
         self.timer = QTimer(self)
@@ -47,17 +50,15 @@ class AnimationWidget(QWidget):
         self.animation_speed = 50 # мс
 
     def set_data(self, data_dict, radius=1.0):
-        """Устанавливает данные для анимации."""
-        print(f"[AnimationWidget] set_data вызван. radius={radius}")
-        self.x_data = data_dict.get('x', [])
-        self.y_data = data_dict.get('y', [])
-        self.t_data = data_dict.get('t', [])
-        print(f"[AnimationWidget] Получены данные: x({len(self.x_data)}), y({len(self.y_data)}), t({len(self.t_data)})")
+        """Устанавливает данные для анимации"""
+
+        # Преобразуем в numpy массивы для эффективности
+        self.x_data = np.array(data_dict.get('x', []))
+        self.y_data = np.array(data_dict.get('y', []))
+        self.t_data = np.array(data_dict.get('t', []))
         self.current_index = 0
         self.radius = radius
-        print(f"[AnimationWidget] self.radius установлен на {self.radius}")
         self.update() # Перерисовать первый кадр
-        print("[AnimationWidget] update() вызван")
 
     def start_animation(self):
         if len(self.x_data) > 1:
@@ -70,16 +71,13 @@ class AnimationWidget(QWidget):
     def update_animation(self):
         if self.current_index < len(self.x_data) - 1:
             self.current_index += 1
-            self.update()  # Обновляем отображение
+            self.update()
         else:
             self.timer.stop() # Остановить в конце
 
     def paintEvent(self, event):
-        print(f"[AnimationWidget] paintEvent вызван. current_index={self.current_index}, data_len_x={len(self.x_data) if hasattr(self, 'x_data') and isinstance(self.x_data, (list, np.ndarray)) else 'N/A'}")
-        # Исправленная проверка на пустоту данных
-        if (not isinstance(self.x_data, (list, np.ndarray)) or len(self.x_data) == 0 or
-            not isinstance(self.y_data, (list, np.ndarray)) or len(self.y_data) == 0):
-            print("[AnimationWidget] paintEvent: Нет данных для отрисовки")
+        # Проверка на пустоту данных
+        if len(self.x_data) == 0 or len(self.y_data) == 0:
             return
 
         painter = QPainter(self)
@@ -90,66 +88,41 @@ class AnimationWidget(QWidget):
         height = self.height()
         margin = 20
         
-        # --- Отладочный вывод масштаба и смещения ---
-        print(f"[paintEvent Debug] Widget size: {width}x{height}, margin: {margin}")
-        print(f"[paintEvent Debug] self.radius: {self.radius}")
-        
-        # Масштабирование (простое, можно улучшить)
+        # Масштабирование
         max_coord = self.radius * 1.2
         if max_coord == 0: max_coord = 1
         scale = min((width - 2*margin), (height - 2*margin)) / (2 * max_coord)
         
-        # --- Отладочный вывод scale ---
-        print(f"[paintEvent Debug] max_coord: {max_coord}, scale: {scale}")
-        
-        # Центр координат (внизу посередине, как в примере лекции)
+        # Центр координат (центр по X, немного выше центра по Y)
         center_x = width // 2
-        center_y = height - margin - 50 # Немного выше нижней границы
-        
-        # --- Отладочный вывод центра ---
-        print(f"[paintEvent Debug] center: ({center_x}, {center_y})")
+        center_y = height // 2 # Центрируем по вертикали
 
         # Рисуем ограничение (например, окружность)
         pen = QPen(QColor("lightgray"), 2, Qt.PenStyle.SolidLine)
         painter.setPen(pen)
-        circle_top_left_x = int(center_x - self.radius * scale)
-        circle_top_left_y = int(center_y - self.radius * scale)
-        circle_width = int(2 * self.radius * scale)
-        circle_height = int(2 * self.radius * scale)
-        # --- Отладочный вывод окружности ---
-        print(f"[paintEvent Debug] Circle rect: ({circle_top_left_x}, {circle_top_left_y}, {circle_width}, {circle_height})")
-        painter.drawEllipse(circle_top_left_x, circle_top_left_y, circle_width, circle_height)
+        painter.drawEllipse(
+            int(center_x - self.radius * scale),
+            int(center_y - self.radius * scale),
+            int(2 * self.radius * scale),
+            int(2 * self.radius * scale)
+        )
 
         # Рисуем траекторию
-        pen = QPen(QColor("lightblue"), 1, Qt.PenStyle.SolidLine)
-        painter.setPen(pen)
-        # Ограничиваем количество рисуемых сегментов для отладки, если нужно
-        num_segments_to_draw = min(self.current_index + 1, 10) # Например, только первые 10
-        num_segments_to_draw = self.current_index + 1
-        for i in range(1, min(num_segments_to_draw, len(self.x_data))):
-            x1 = center_x + int(self.x_data[i-1] * scale)
-            y1 = center_y - int(self.y_data[i-1] * scale) # Инвертируем Y
-            x2 = center_x + int(self.x_data[i] * scale)
-            y2 = center_y - int(self.y_data[i] * scale)
-            # --- Отладочный вывод первых нескольких точек траектории ---
-            if i < 5:
-                print(f"[paintEvent Debug] Trajectory segment {i}: ({x1}, {y1}) -> ({x2}, {y2})")
-            painter.drawLine(x1, y1, x2, y2)
+        if self.current_index > 0:
+            pen = QPen(QColor("lightblue"), 1, Qt.PenStyle.SolidLine)
+            painter.setPen(pen)
+            # Рисуем линии между точками до текущей
+            for i in range(1, self.current_index + 1):
+                x1 = center_x + int(self.x_data[i-1] * scale)
+                y1 = center_y - int(self.y_data[i-1] * scale) # Инвертируем Y
+                x2 = center_x + int(self.x_data[i] * scale)
+                y2 = center_y - int(self.y_data[i] * scale)
+                painter.drawLine(x1, y1, x2, y2)
 
         # Рисуем объект (шарик)
         if 0 <= self.current_index < len(self.x_data):
-            obj_x_unscaled = self.x_data[self.current_index]
-            obj_y_unscaled = self.y_data[self.current_index]
-            obj_x = center_x + int(obj_x_unscaled * scale)
-            obj_y = center_y - int(obj_y_unscaled * scale) # Инвертируем Y
-            
-            # --- Отладочный вывод координат объекта ---
-            print(f"[paintEvent Debug] Object raw coords: ({obj_x_unscaled}, {obj_y_unscaled})")
-            print(f"[paintEvent Debug] Object scaled coords: ({obj_x}, {obj_y})")
-            
-            # Проверка, находится ли объект в пределах виджета (грубая)
-            if not (0 <= obj_x <= width and 0 <= obj_y <= height):
-                print(f"[paintEvent Debug] WARNING: Object is likely outside widget bounds!")
+            obj_x = center_x + int(self.x_data[self.current_index] * scale)
+            obj_y = center_y - int(self.y_data[self.current_index] * scale) # Инвертируем Y
             
             pen = QPen(QColor("red"), 2, Qt.PenStyle.SolidLine)
             painter.setPen(pen)
@@ -160,20 +133,14 @@ class AnimationWidget(QWidget):
             # Подпись с временем
             painter.setPen(QPen(QColor("black")))
             painter.setFont(QFont("Arial", 8))
-            # Отображаем реальное время, если оно есть
             time_str = f"i={self.current_index}"
             if 0 <= self.current_index < len(self.t_data):
                 time_str = f"t={self.t_data[self.current_index]:.3f}s"
             painter.drawText(obj_x + 10, obj_y, time_str)
-            # --- Отладочный вывод текста ---
-            # print(f"[paintEvent Debug] Drawing text '{time_str}' at ({obj_x + 10}, {obj_y})")
-
-        # --- Отладочный вывод в конце ---
-        print(f"[paintEvent Debug] Frame for index {self.current_index} drawn.")
-
 
 class MainWindow(QMainWindow):
-    """Главное окно приложения."""
+    """Главное окно приложения"""
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Лабораторная работа 1 - Моделирование движения")
@@ -189,7 +156,7 @@ class MainWindow(QMainWindow):
         left_layout = QVBoxLayout(left_panel)
         left_panel.setMaximumWidth(350)
 
-        # --- Группа параметров модели ---
+        # Группа параметров модели
         self.model_group = InputGroupBox("Параметры модели")
         self.le_radius = QDoubleSpinBox()
         self.le_radius.setRange(0.1, 100.0)
@@ -216,7 +183,7 @@ class MainWindow(QMainWindow):
         self.model_group.addRow("Масса (m):", self.le_mass)
         left_layout.addWidget(self.model_group)
 
-        # --- Группа начальных условий ---
+        # Группа начальных условий
         self.ic_group = InputGroupBox("Начальные условия")
         self.le_angle = QDoubleSpinBox()
         self.le_angle.setRange(-np.pi, np.pi)
@@ -238,7 +205,7 @@ class MainWindow(QMainWindow):
         self.ic_group.addRow("Vy0:", self.le_vy0)
         left_layout.addWidget(self.ic_group)
 
-        # --- Группа параметров интегрирования ---
+        # Группа параметров интегрирования
         self.int_group = InputGroupBox("Параметры интегрирования")
         self.le_t_start = QDoubleSpinBox()
         self.le_t_start.setRange(0.0, 1000.0)
@@ -267,7 +234,7 @@ class MainWindow(QMainWindow):
         self.int_group.addRow("dt (мелкий):", self.le_dt_fine)
         left_layout.addWidget(self.int_group)
 
-        # --- Кнопки управления ---
+        # Кнопки управления
         self.btn_run = QPushButton("Запустить расчеты")
         self.btn_run.setStyleSheet("font-weight: bold;")
         left_layout.addWidget(self.btn_run)
@@ -282,7 +249,7 @@ class MainWindow(QMainWindow):
 
         left_layout.addStretch()
 
-        # --- Правая панель (графики и анимация) ---
+        # Правая панель (графики и анимация)
         right_splitter = QSplitter(Qt.Orientation.Vertical)
         
         # Верхняя часть - графики
@@ -295,7 +262,6 @@ class MainWindow(QMainWindow):
         
         # Нижняя часть - анимация
         self.animation_widget = AnimationWidget()
-        # Изначально делаем её меньше
         right_splitter.addWidget(self.plot_tabs)
         right_splitter.addWidget(self.animation_widget)
         right_splitter.setSizes([600, 300]) # Примерные размеры
@@ -304,11 +270,12 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(left_panel)
         main_layout.addWidget(right_splitter)
 
-        # --- Хранилище для данных графиков ---
+        # Хранилище для данных графиков
         self.plot_data = {}
 
     def get_parameters(self):
-        """Собирает параметры из полей ввода."""
+        """Собирает параметры из полей ввода"""
+
         return {
             'radius': self.le_radius.value(),
             'gravity': self.le_gravity.value(),
@@ -324,7 +291,8 @@ class MainWindow(QMainWindow):
         }
 
     def set_parameters(self, params):
-        """Устанавливает параметры в поля ввода."""
+        """Устанавливает параметры в поля ввода"""
+
         self.le_radius.setValue(params['radius'])
         self.le_gravity.setValue(params['gravity'])
         self.le_friction.setValue(params['friction_coeff'])
@@ -338,7 +306,8 @@ class MainWindow(QMainWindow):
         self.le_dt_fine.setValue(params['dt_fine'])
 
     def plot_results(self, results_dict):
-        """Строит графики на основе переданных данных."""
+        """Строит графики на основе переданных данных"""
+
         self.plot_data = results_dict
         fig = self.fig_canvas.figure
         fig.clear()
@@ -417,6 +386,7 @@ class MainWindow(QMainWindow):
         fig.canvas.draw()
         
     def enable_animation_controls(self, enable=True):
-        """Активирует/деактивирует кнопки анимации."""
+        """Активирует/деактивирует кнопки анимации"""
+        
         self.btn_animate.setEnabled(enable)
         self.btn_stop_animate.setEnabled(enable)
