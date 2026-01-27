@@ -25,19 +25,16 @@ class PendulumMotionModel:
         
         x, y, vx, vy = state
 
-        # Вычисление множителя Лагранжа lambda (см. лекцию стр. 9)
-        # lambda = (m * (vx^2 + vy^2) - m * g * y) / R^2
-        numerator = self.m * (vx**2 + vy**2) - self.m * self.g * y
-        denominator = self.R**2
-        if abs(denominator) > 1e-10: # Защита от деления на ноль
-            _lambda = numerator / denominator
-        else:
-            _lambda = 0.0
-
-        # Уравнения движения с трением (см. лекцию стр. 9)
-        # mx'' = -lambda * x - b * vx
-        # my'' = -m * g - lambda * y - b * vy
-        ax = (-_lambda * x - self.b * vx) / self.m
-        ay = (-self.m * self.g - _lambda * y - self.b * vy) / self.m
+        # Подавляем предупреждения NumPy при overflow/invalid (неустойчивое решение)
+        with np.errstate(invalid="ignore", over="ignore", divide="ignore"):
+            # Вычисление множителя Лагранжа lambda (см. лекцию стр. 9)
+            numerator = self.m * (vx**2 + vy**2) - self.m * self.g * y
+            denominator = self.R**2
+            if abs(denominator) > 1e-10:
+                _lambda = numerator / denominator
+            else:
+                _lambda = 0.0
+            ax = (-_lambda * x - self.b * vx) / self.m
+            ay = (-self.m * self.g - _lambda * y - self.b * vy) / self.m
 
         return np.array([vx, vy, ax, ay])

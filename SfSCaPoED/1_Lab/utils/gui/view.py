@@ -2,10 +2,10 @@ import sys
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QGroupBox, QFormLayout, QLabel,
     QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QSplitter, QSizePolicy,
-    QDoubleSpinBox, QSpinBox
+    QDoubleSpinBox, QSpinBox, QGridLayout
 )
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QPainter, QColor, QPen, QFont
+from PyQt6.QtCore import Qt, QTimer, QRect, QSize
+from PyQt6.QtGui import QPainter, QColor, QPen, QFont, QPalette, QBrush
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import numpy as np
@@ -13,13 +13,28 @@ import numpy as np
 class InputGroupBox(QGroupBox):
     """Группа для ввода параметров"""
 
+    # Компактная ширина полей ввода (чтобы не тянулись на всю колонку)
+    FIELD_WIDTH = 88
+
     def __init__(self, title, parent=None):
         super().__init__(title, parent)
         layout = QFormLayout()
+        layout.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.FieldsStayAtSizeHint)
         self.setLayout(layout)
 
-    def addRow(self, label_text, widget):
-        self.layout().addRow(QLabel(label_text), widget)
+    def addRow(self, label_text, widget, tooltip=None):
+        """Добавляет строку: подпись + виджет. tooltip задаёт подсказку для подписи и поля."""
+        lbl = QLabel(label_text)
+        if tooltip:
+            lbl.setToolTip(tooltip)
+            widget.setToolTip(tooltip)
+            # Длительность показа подсказки (мс) — на виджете, не на QApplication
+            for w in (lbl, widget):
+                if hasattr(w, "setToolTipDuration"):
+                    w.setToolTipDuration(5000)
+        if hasattr(widget, "setMaximumWidth"):
+            widget.setMaximumWidth(self.FIELD_WIDTH)
+        self.layout().addRow(lbl, widget)
 
 class PlotCanvas(FigureCanvas):
     """Холст для matplotlib"""
@@ -36,8 +51,13 @@ class AnimationWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setMinimumSize(400, 400)
-        self.setStyleSheet("background-color: white; border: 1px solid gray;")
-        
+        self.setStyleSheet("background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px;")
+        # Жёстко задаём светлый фон, чтобы не зависеть от темы ОС
+        pal = QPalette()
+        pal.setColor(QPalette.ColorRole.Window, QColor(248, 249, 250))
+        self.setPalette(pal)
+        self.setAutoFillBackground(True)
+
         self.x_data = np.array([])
         self.y_data = np.array([])
         self.t_data = np.array([])
@@ -75,68 +95,107 @@ class AnimationWidget(QWidget):
         else:
             self.timer.stop() # Остановить в конце
 
-    def paintEvent(self, event):
-        # Проверка на пустоту данных
-        if len(self.x_data) == 0 or len(self.y_data) == 0:
-            return
+    def _clamp_px(self, v, lo=-2**31 + 1, hi=2**31 - 1):
+        """Ограничивает координату пикселя в диапазон int32, чтобы QPainter не падал с OverflowError."""
+        return max(lo, min(hi, int(np.round(v))))
 
+    def hasHeightForWidth(self):
+        return True
+
+    def heightForWidth(self, w):
+        """Сохраняем квадрат: высота = ширина."""
+        return max(self.minimumHeight(), w)
+
+    def sizeHint(self):
+        s = 360
+        return QSize(s, s)
+
+    def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        
-        # Размеры виджета
+        painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
+
+        painter.fillRect(self.rect(), QColor(248, 249, 250))
+
+        # Область для текста — с отступами, чтобы надписи помещались в виджет
+        text_rect = self.rect().adjusted(20, 20, -20, -20)
+        wrap_center = Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap
+
+        if len(self.x_data) == 0 or len(self.y_data) == 0:
+            painter.setPen(QColor(108, 117, 125))
+            painter.setFont(QFont("Segoe UI", 10))
+            painter.drawText(text_rect, wrap_center, "Запустите расчёт и анимацию")
+            return
+
+        # Если в данных есть NaN/Inf (неустойчивое решение)
+        used_x = self.x_data[: self.current_index + 1] if self.current_index < len(self.x_data) else self.x_data
+        used_y = self.y_data[: self.current_index + 1] if self.current_index < len(self.y_data) else self.y_data
+        if not np.all(np.isfinite(used_x)) or not np.all(np.isfinite(used_y)):
+            painter.setPen(QColor(108, 117, 125))
+            painter.setFont(QFont("Segoe UI", 9))
+            painter.drawText(
+                text_rect, wrap_center,
+                "Решение неустойчиво (NaN/Inf). Уменьшите шаг dt или измените параметры."
+            )
+            return
+
         width = self.width()
         height = self.height()
-        margin = 20
-        
-        # Масштабирование
+        margin = 24
         max_coord = self.radius * 1.2
-        if max_coord == 0: max_coord = 1
-        scale = min((width - 2*margin), (height - 2*margin)) / (2 * max_coord)
-        
-        # Центр координат (центр по X, немного выше центра по Y)
+        if max_coord == 0:
+            max_coord = 1
+        scale = min((width - 2 * margin), (height - 2 * margin)) / (2 * max_coord)
         center_x = width // 2
-        center_y = height // 2 # Центрируем по вертикали
+        center_y = height // 2
+        clamp = self._clamp_px
 
-        # Рисуем ограничение (например, окружность)
-        pen = QPen(QColor("lightgray"), 2, Qt.PenStyle.SolidLine)
-        painter.setPen(pen)
+        # Ограничение — окружность (чёткий контур на светлом фоне)
+        painter.setPen(QPen(QColor(73, 80, 87), 2, Qt.PenStyle.SolidLine))
+        painter.setBrush(QBrush(Qt.BrushStyle.NoBrush))
+        r_px = clamp(self.radius * scale)
         painter.drawEllipse(
-            int(center_x - self.radius * scale),
-            int(center_y - self.radius * scale),
-            int(2 * self.radius * scale),
-            int(2 * self.radius * scale)
+            clamp(center_x - r_px), clamp(center_y - r_px),
+            max(1, min(r_px * 2, 2**31 - 1)), max(1, min(r_px * 2, 2**31 - 1))
         )
 
-        # Рисуем траекторию
+        # Траектория — насыщенный синий, координаты ограничиваем во избежание OverflowError
         if self.current_index > 0:
-            pen = QPen(QColor("lightblue"), 1, Qt.PenStyle.SolidLine)
-            painter.setPen(pen)
-            # Рисуем линии между точками до текущей
+            painter.setPen(QPen(QColor(30, 64, 175), 2, Qt.PenStyle.SolidLine))
             for i in range(1, self.current_index + 1):
-                x1 = center_x + int(self.x_data[i-1] * scale)
-                y1 = center_y - int(self.y_data[i-1] * scale) # Инвертируем Y
-                x2 = center_x + int(self.x_data[i] * scale)
-                y2 = center_y - int(self.y_data[i] * scale)
+                x1 = clamp(center_x + self.x_data[i - 1] * scale)
+                y1 = clamp(center_y - self.y_data[i - 1] * scale)
+                x2 = clamp(center_x + self.x_data[i] * scale)
+                y2 = clamp(center_y - self.y_data[i] * scale)
                 painter.drawLine(x1, y1, x2, y2)
 
-        # Рисуем объект (шарик)
+        # Объект (шарик) и подпись времени
         if 0 <= self.current_index < len(self.x_data):
-            obj_x = center_x + int(self.x_data[self.current_index] * scale)
-            obj_y = center_y - int(self.y_data[self.current_index] * scale) # Инвертируем Y
-            
-            pen = QPen(QColor("red"), 2, Qt.PenStyle.SolidLine)
-            painter.setPen(pen)
-            brush_color = QColor("red")
-            painter.setBrush(brush_color)
-            painter.drawEllipse(obj_x - 5, obj_y - 5, 10, 10)
-            
-            # Подпись с временем
-            painter.setPen(QPen(QColor("black")))
-            painter.setFont(QFont("Arial", 8))
-            time_str = f"i={self.current_index}"
-            if 0 <= self.current_index < len(self.t_data):
-                time_str = f"t={self.t_data[self.current_index]:.3f}s"
-            painter.drawText(obj_x + 10, obj_y, time_str)
+            obj_x = clamp(center_x + self.x_data[self.current_index] * scale)
+            obj_y = clamp(center_y - self.y_data[self.current_index] * scale)
+
+            painter.setPen(QPen(QColor(220, 53, 69), 2, Qt.PenStyle.SolidLine))
+            painter.setBrush(QBrush(QColor(220, 53, 69)))
+            painter.drawEllipse(clamp(obj_x - 6), clamp(obj_y - 6), 12, 12)
+
+            time_str = f"t={self.t_data[self.current_index]:.3f} s" if self.current_index < len(self.t_data) else f"i={self.current_index}"
+            font = QFont("Segoe UI", 9)
+            font.setBold(True)
+            painter.setFont(font)
+            fm = painter.fontMetrics()
+            text_rect = fm.boundingRect(time_str)
+            pad_x, pad_y = 6, 2
+            box = QRect(
+                clamp(obj_x + 10),
+                clamp(obj_y - text_rect.height() // 2 - pad_y),
+                max(1, text_rect.width() + 2 * pad_x),
+                max(1, text_rect.height() + 2 * pad_y)
+            )
+            painter.setBrush(QColor(255, 255, 255))
+            painter.setPen(QPen(QColor(200, 200, 200), 1))
+            painter.drawRoundedRect(box, 4, 4)
+            painter.setPen(QColor(33, 37, 41))
+            painter.drawText(box, Qt.AlignmentFlag.AlignCenter, time_str)
 
 class MainWindow(QMainWindow):
     """Главное окно приложения"""
@@ -146,41 +205,42 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Лабораторная работа 1 - Моделирование движения")
         self.setGeometry(100, 100, 1400, 900)
 
-        # Центральный виджет
+        # Центральный виджет — сетка 2x2: [Настройки|График], [Анимация|График]
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
-        main_layout = QHBoxLayout(central_widget)
+        grid = QGridLayout(central_widget)
 
-        # Левая панель (ввод данных и управление)
+        # Левая колонка — шире, чтобы настройки и окно анимации (квадрат) помещались
         left_panel = QWidget()
         left_layout = QVBoxLayout(left_panel)
-        left_panel.setMaximumWidth(350)
+        left_panel.setMinimumWidth(380)
+        left_panel.setMaximumWidth(440)
 
-        # Группа параметров модели
+        # Группа параметров модели (с подсказками к параметрам)
         self.model_group = InputGroupBox("Параметры модели")
         self.le_radius = QDoubleSpinBox()
         self.le_radius.setRange(0.1, 100.0)
         self.le_radius.setSingleStep(0.1)
         self.le_radius.setValue(1.0)
-        self.model_group.addRow("Радиус (R):", self.le_radius)
+        self.model_group.addRow("Радиус (R):", self.le_radius, "Радиус окружности, по которой движется шарик (м)")
 
         self.le_gravity = QDoubleSpinBox()
         self.le_gravity.setRange(0.1, 50.0)
         self.le_gravity.setSingleStep(0.1)
         self.le_gravity.setValue(9.81)
-        self.model_group.addRow("Ускорение (g):", self.le_gravity)
+        self.model_group.addRow("Ускорение (g):", self.le_gravity, "Ускорение свободного падения (м/с²)")
 
         self.le_friction = QDoubleSpinBox()
         self.le_friction.setRange(0.0, 10.0)
         self.le_friction.setSingleStep(0.01)
         self.le_friction.setValue(0.2)
-        self.model_group.addRow("Трение (b):", self.le_friction)
+        self.model_group.addRow("Трение (b):", self.le_friction, "Коэффициент трения (демпфирования)")
 
         self.le_mass = QDoubleSpinBox()
         self.le_mass.setRange(0.1, 100.0)
         self.le_mass.setSingleStep(0.1)
         self.le_mass.setValue(1.0)
-        self.model_group.addRow("Масса (m):", self.le_mass)
+        self.model_group.addRow("Масса (m):", self.le_mass, "Масса шарика (кг)")
         left_layout.addWidget(self.model_group)
 
         # Группа начальных условий
@@ -190,19 +250,19 @@ class MainWindow(QMainWindow):
         self.le_angle.setSingleStep(0.01)
         self.le_angle.setValue(0.1)
         self.le_angle.setDecimals(3)
-        self.ic_group.addRow("Угол (рад):", self.le_angle)
+        self.ic_group.addRow("Угол (рад):", self.le_angle, "Начальный угол отклонения от вертикали (рад)")
 
         self.le_vx0 = QDoubleSpinBox()
         self.le_vx0.setRange(-100.0, 100.0)
         self.le_vx0.setSingleStep(0.1)
         self.le_vx0.setValue(0.0)
-        self.ic_group.addRow("Vx0:", self.le_vx0)
+        self.ic_group.addRow("Vx0:", self.le_vx0, "Начальная скорость по оси x (м/с)")
 
         self.le_vy0 = QDoubleSpinBox()
         self.le_vy0.setRange(-100.0, 100.0)
         self.le_vy0.setSingleStep(0.1)
         self.le_vy0.setValue(0.0)
-        self.ic_group.addRow("Vy0:", self.le_vy0)
+        self.ic_group.addRow("Vy0:", self.le_vy0, "Начальная скорость по оси y (м/с)")
         left_layout.addWidget(self.ic_group)
 
         # Группа параметров интегрирования
@@ -211,27 +271,27 @@ class MainWindow(QMainWindow):
         self.le_t_start.setRange(0.0, 1000.0)
         self.le_t_start.setSingleStep(0.1)
         self.le_t_start.setValue(0.0)
-        self.int_group.addRow("t_start:", self.le_t_start)
+        self.int_group.addRow("t_start:", self.le_t_start, "Начало интервала интегрирования (с)")
 
         self.le_t_end = QDoubleSpinBox()
         self.le_t_end.setRange(0.1, 1000.0)
         self.le_t_end.setSingleStep(0.1)
         self.le_t_end.setValue(5.0)
-        self.int_group.addRow("t_end:", self.le_t_end)
+        self.int_group.addRow("t_end:", self.le_t_end, "Конец интервала интегрирования (с)")
 
         self.le_dt_coarse = QDoubleSpinBox()
         self.le_dt_coarse.setRange(0.0001, 1.0)
         self.le_dt_coarse.setSingleStep(0.001)
         self.le_dt_coarse.setDecimals(4)
         self.le_dt_coarse.setValue(0.05)
-        self.int_group.addRow("dt (грубый):", self.le_dt_coarse)
+        self.int_group.addRow("dt (грубый):", self.le_dt_coarse, "Шаг для методов Euler, Heun, RK4 (с)")
 
         self.le_dt_fine = QDoubleSpinBox()
         self.le_dt_fine.setRange(0.0001, 1.0)
         self.le_dt_fine.setSingleStep(0.0001)
         self.le_dt_fine.setDecimals(5)
         self.le_dt_fine.setValue(0.005)
-        self.int_group.addRow("dt (мелкий):", self.le_dt_fine)
+        self.int_group.addRow("dt (мелкий):", self.le_dt_fine, "Мелкий шаг для эталонного решения RK4 (с)")
         left_layout.addWidget(self.int_group)
 
         # Кнопки управления
@@ -249,26 +309,27 @@ class MainWindow(QMainWindow):
 
         left_layout.addStretch()
 
-        # Правая панель (графики и анимация)
-        right_splitter = QSplitter(Qt.Orientation.Vertical)
-        
-        # Верхняя часть - графики
+        # Левая колонка, строка 1: окно анимации (квадрат 360×360, шире чем раньше)
+        self.animation_widget = AnimationWidget()
+        self.animation_widget.setMinimumSize(360, 360)
+        self.animation_widget.setSizePolicy(
+            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred
+        )
+
+        # Правая колонка (на обе строки): график результатов
         self.plot_tabs = QWidget()
         plot_layout = QVBoxLayout(self.plot_tabs)
-        
-        # Создаем холсты для графиков
-        self.fig_canvas = FigureCanvas(plt.Figure(figsize=(10, 8)))
+        self.fig_canvas = FigureCanvas(plt.Figure(figsize=(8, 6)))
         plot_layout.addWidget(self.fig_canvas)
-        
-        # Нижняя часть - анимация
-        self.animation_widget = AnimationWidget()
-        right_splitter.addWidget(self.plot_tabs)
-        right_splitter.addWidget(self.animation_widget)
-        right_splitter.setSizes([600, 300]) # Примерные размеры
 
-        # Добавляем панели в основной лейаут
-        main_layout.addWidget(left_panel)
-        main_layout.addWidget(right_splitter)
+        # Сетка 2x2: (0,0)=настройки, (1,0)=анимация, (0,1)-(1,1)=график на всю высоту
+        grid.addWidget(left_panel, 0, 0)
+        grid.addWidget(self.animation_widget, 1, 0)
+        grid.addWidget(self.plot_tabs, 0, 1, 2, 1)  # rowSpan=2 — график на всю 2-ю колонку
+        grid.setColumnMinimumWidth(0, 380)  # левая колонка шире, чтобы анимация была квадратом
+        grid.setColumnStretch(1, 1)   # колонка с графиком тянется
+        grid.setRowStretch(0, 1)
+        grid.setRowStretch(1, 1)
 
         # Хранилище для данных графиков
         self.plot_data = {}

@@ -53,10 +53,16 @@ class AppModel(QObject):
             vy0 = self.params['vy0']
             initial_conditions = [x0, y0, vx0, vy0]
 
-            # 3. Задаем параметры интегрирования
-            t_span = (self.params['t_start'], self.params['t_end'])
+            # 3. Задаем параметры интегрирования и проверяем их
+            t_start = self.params['t_start']
+            t_end = self.params['t_end']
             dt_coarse = self.params['dt_coarse']
             dt_fine = self.params['dt_fine']
+            if t_end <= t_start:
+                raise ValueError(f"Конец интервала (t_end={t_end}) должен быть больше начала (t_start={t_start}).")
+            if dt_coarse <= 0 or dt_fine <= 0:
+                raise ValueError("Шаги интегрирования dt должны быть положительными.")
+            t_span = (t_start, t_end)
 
             # 4. Создаем решатели
             euler_solver = EulerMethod()

@@ -7,8 +7,6 @@ from utils.gui.resources import STYLESHEET
 
 def main():
     app = QApplication(sys.argv)
-    
-    # Применяем стили, если есть
     if STYLESHEET:
         app.setStyleSheet(STYLESHEET)
     
