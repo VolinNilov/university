@@ -47,7 +47,7 @@ class MotionAnimator:
         ax.set_title(title)
 
         # Рисуем ограничение (окружность)
-        circle = plt.Circle((0, 0), model.R, color='lightgray', fill=False, linewidth=2, label='Траектория')
+        circle = plt.Circle((0, 0), model.R, color='lightgray', fill=True, linewidth=2, label='Траектория')
         ax.add_patch(circle)
 
         # Инициализируем элементы анимации

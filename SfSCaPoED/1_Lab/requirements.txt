@@ -1,0 +1,9 @@
+# GUI
+PyQt6>=6.4.0
+
+# Численные расчёты и визуализация
+numpy>=1.21.0
+matplotlib>=3.5.0
+
+# Сохранение анимаций в GIF (utils/animation.py)
+Pillow>=9.0.0
