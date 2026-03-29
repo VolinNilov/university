@@ -44,8 +44,7 @@ class AppController(QObject):
         """Обработчик нажатия кнопки 'Запустить анимацию'"""
 
         if self.animation_data:
-            radius = self.view.get_parameters()['radius']
-            self.view.animation_widget.set_data(self.animation_data, radius)
+            self.view.animation_widget.set_data(self.animation_data)
             self.view.animation_widget.start_animation()
             self.view.btn_animate.setEnabled(False)
             self.view.btn_stop_animate.setEnabled(True)

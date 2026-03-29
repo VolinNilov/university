@@ -1,18 +1,17 @@
 DEFAULT_PARAMS = {
-    'radius': 1.0,
-    'gravity': 9.81,
-    'friction_coeff': 0.2,
-    'mass': 1.0,
-    'angle_rad': 0.1,
-    'vx0': 0.0,
-    'vy0': 0.0,
-    't_start': 0.0,
-    't_end': 5.0,
-    'dt_coarse': 0.05,
-    'dt_fine': 0.005
+    "gravity": 9.81,
+    "friction_coeff": 0.2,
+    "mass": 1.0,
+    "x0": 0.0,
+    "y0": 4.0,
+    "vx0": 0.0,
+    "vy0": 0.0,
+    "t_start": 0.0,
+    "t_end": 5.0,
+    "dt_coarse": 0.05,
+    "dt_fine": 0.005,
 }
 
-# Стили для Qt
 STYLESHEET = """
 QGroupBox {
     font-weight: bold;

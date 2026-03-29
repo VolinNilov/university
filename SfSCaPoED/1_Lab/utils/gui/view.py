@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import numpy as np
 
+from utils.model import ConstraintMotionModel
+
 class InputGroupBox(QGroupBox):
     """Группа для ввода параметров"""
 
@@ -62,23 +64,25 @@ class AnimationWidget(QWidget):
         self.y_data = np.array([])
         self.t_data = np.array([])
         self.current_index = 0
-        self.radius = 1.0 # Для отрисовки ограничения
-        
+        self.bbox = ConstraintMotionModel.constraint_bbox()
+        self.curve_x, self.curve_y = ConstraintMotionModel.constraint_curve_xy()
+
         # Таймер для анимации
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_animation)
         self.animation_speed = 50 # мс
 
-    def set_data(self, data_dict, radius=1.0):
-        """Устанавливает данные для анимации"""
+    def set_data(self, data_dict):
+        """Устанавливает данные для анимации (ожидает ключи x, y, t; опционально _bbox)."""
 
-        # Преобразуем в numpy массивы для эффективности
-        self.x_data = np.array(data_dict.get('x', []))
-        self.y_data = np.array(data_dict.get('y', []))
-        self.t_data = np.array(data_dict.get('t', []))
+        self.x_data = np.array(data_dict.get("x", []))
+        self.y_data = np.array(data_dict.get("y", []))
+        self.t_data = np.array(data_dict.get("t", []))
         self.current_index = 0
-        self.radius = radius
-        self.update() # Перерисовать первый кадр
+        bb = data_dict.get("_bbox")
+        self.bbox = tuple(bb) if bb is not None else ConstraintMotionModel.constraint_bbox()
+        self.curve_x, self.curve_y = ConstraintMotionModel.constraint_curve_xy()
+        self.update()
 
     def start_animation(self):
         if len(self.x_data) > 1:
@@ -142,37 +146,40 @@ class AnimationWidget(QWidget):
         width = self.width()
         height = self.height()
         margin = 24
-        max_coord = self.radius * 1.2
-        if max_coord == 0:
-            max_coord = 1
-        scale = min((width - 2 * margin), (height - 2 * margin)) / (2 * max_coord)
+        xmin, xmax, ymin, ymax = self.bbox
+        w_world = max(xmax - xmin, 1e-6)
+        h_world = max(ymax - ymin, 1e-6)
+        scale = min((width - 2 * margin) / w_world, (height - 2 * margin) / h_world)
+        cx_world = 0.5 * (xmin + xmax)
+        cy_world = 0.5 * (ymin + ymax)
         center_x = width // 2
         center_y = height // 2
         clamp = self._clamp_px
 
-        # Ограничение — окружность (чёткий контур на светлом фоне)
+        def world_to_px(wx, wy):
+            sx = center_x + (wx - cx_world) * scale
+            sy = center_y - (wy - cy_world) * scale
+            return clamp(sx), clamp(sy)
+
+        # Контур связи f=0
         painter.setPen(QPen(QColor(73, 80, 87), 2, Qt.PenStyle.SolidLine))
         painter.setBrush(QBrush(Qt.BrushStyle.NoBrush))
-        r_px = clamp(self.radius * scale)
-        painter.drawEllipse(
-            clamp(center_x - r_px), clamp(center_y - r_px),
-            max(1, min(r_px * 2, 2**31 - 1)), max(1, min(r_px * 2, 2**31 - 1))
-        )
+        if len(self.curve_x) > 1:
+            for i in range(1, len(self.curve_x)):
+                x1, y1 = world_to_px(self.curve_x[i - 1], self.curve_y[i - 1])
+                x2, y2 = world_to_px(self.curve_x[i], self.curve_y[i])
+                painter.drawLine(x1, y1, x2, y2)
 
-        # Траектория — насыщенный синий, координаты ограничиваем во избежание OverflowError
+        # Траектория
         if self.current_index > 0:
             painter.setPen(QPen(QColor(30, 64, 175), 2, Qt.PenStyle.SolidLine))
             for i in range(1, self.current_index + 1):
-                x1 = clamp(center_x + self.x_data[i - 1] * scale)
-                y1 = clamp(center_y - self.y_data[i - 1] * scale)
-                x2 = clamp(center_x + self.x_data[i] * scale)
-                y2 = clamp(center_y - self.y_data[i] * scale)
+                x1, y1 = world_to_px(self.x_data[i - 1], self.y_data[i - 1])
+                x2, y2 = world_to_px(self.x_data[i], self.y_data[i])
                 painter.drawLine(x1, y1, x2, y2)
 
-        # Объект (шарик) и подпись времени
         if 0 <= self.current_index < len(self.x_data):
-            obj_x = clamp(center_x + self.x_data[self.current_index] * scale)
-            obj_y = clamp(center_y - self.y_data[self.current_index] * scale)
+            obj_x, obj_y = world_to_px(self.x_data[self.current_index], self.y_data[self.current_index])
 
             painter.setPen(QPen(QColor(220, 53, 69), 2, Qt.PenStyle.SolidLine))
             painter.setBrush(QBrush(QColor(220, 53, 69)))
@@ -218,12 +225,6 @@ class MainWindow(QMainWindow):
 
         # Группа параметров модели (с подсказками к параметрам)
         self.model_group = InputGroupBox("Параметры модели")
-        self.le_radius = QDoubleSpinBox()
-        self.le_radius.setRange(0.1, 100.0)
-        self.le_radius.setSingleStep(0.1)
-        self.le_radius.setValue(1.0)
-        self.model_group.addRow("Радиус (R):", self.le_radius, "Радиус окружности, по которой движется шарик (м)")
-
         self.le_gravity = QDoubleSpinBox()
         self.le_gravity.setRange(0.1, 50.0)
         self.le_gravity.setSingleStep(0.1)
@@ -245,12 +246,19 @@ class MainWindow(QMainWindow):
 
         # Группа начальных условий
         self.ic_group = InputGroupBox("Начальные условия")
-        self.le_angle = QDoubleSpinBox()
-        self.le_angle.setRange(-np.pi, np.pi)
-        self.le_angle.setSingleStep(0.01)
-        self.le_angle.setValue(0.1)
-        self.le_angle.setDecimals(3)
-        self.ic_group.addRow("Угол (рад):", self.le_angle, "Начальный угол отклонения от вертикали (рад)")
+        self.le_x0 = QDoubleSpinBox()
+        self.le_x0.setRange(-100.0, 100.0)
+        self.le_x0.setSingleStep(0.1)
+        self.le_x0.setDecimals(4)
+        self.le_x0.setValue(0.0)
+        self.ic_group.addRow("x0:", self.le_x0, "Начальная координата x (на связи f=0)")
+
+        self.le_y0 = QDoubleSpinBox()
+        self.le_y0.setRange(-100.0, 100.0)
+        self.le_y0.setSingleStep(0.1)
+        self.le_y0.setDecimals(4)
+        self.le_y0.setValue(4.0)
+        self.ic_group.addRow("y0:", self.le_y0, "Начальная координата y (на связи f=0)")
 
         self.le_vx0 = QDoubleSpinBox()
         self.le_vx0.setRange(-100.0, 100.0)
@@ -338,28 +346,28 @@ class MainWindow(QMainWindow):
         """Собирает параметры из полей ввода"""
 
         return {
-            'radius': self.le_radius.value(),
-            'gravity': self.le_gravity.value(),
-            'friction_coeff': self.le_friction.value(),
-            'mass': self.le_mass.value(),
-            'angle_rad': self.le_angle.value(),
-            'vx0': self.le_vx0.value(),
-            'vy0': self.le_vy0.value(),
-            't_start': self.le_t_start.value(),
-            't_end': self.le_t_end.value(),
-            'dt_coarse': self.le_dt_coarse.value(),
-            'dt_fine': self.le_dt_fine.value(),
+            "gravity": self.le_gravity.value(),
+            "friction_coeff": self.le_friction.value(),
+            "mass": self.le_mass.value(),
+            "x0": self.le_x0.value(),
+            "y0": self.le_y0.value(),
+            "vx0": self.le_vx0.value(),
+            "vy0": self.le_vy0.value(),
+            "t_start": self.le_t_start.value(),
+            "t_end": self.le_t_end.value(),
+            "dt_coarse": self.le_dt_coarse.value(),
+            "dt_fine": self.le_dt_fine.value(),
         }
 
     def set_parameters(self, params):
         """Устанавливает параметры в поля ввода"""
 
-        self.le_radius.setValue(params['radius'])
-        self.le_gravity.setValue(params['gravity'])
-        self.le_friction.setValue(params['friction_coeff'])
-        self.le_mass.setValue(params['mass'])
-        self.le_angle.setValue(params['angle_rad'])
-        self.le_vx0.setValue(params['vx0'])
+        self.le_gravity.setValue(params["gravity"])
+        self.le_friction.setValue(params["friction_coeff"])
+        self.le_mass.setValue(params["mass"])
+        self.le_x0.setValue(params["x0"])
+        self.le_y0.setValue(params["y0"])
+        self.le_vx0.setValue(params["vx0"])
         self.le_vy0.setValue(params['vy0'])
         self.le_t_start.setValue(params['t_start'])
         self.le_t_end.setValue(params['t_end'])

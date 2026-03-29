@@ -1,12 +1,12 @@
 {
     "model": {
-        "radius": 5.0,
         "gravity": 9.81,
         "friction_coeff": 0.2,
         "mass": 0.5
     },
     "initial_conditions": {
-        "angle_rad": 0.1,
+        "x0": 0.0,
+        "y0": 4.0,
         "vx0": 0.0,
         "vy0": 0.0
     },

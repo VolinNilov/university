@@ -9,7 +9,7 @@ class MotionSimulator:
     def __init__(self, model, output_dir_name="data"):
         """
         Args:
-            model: Модель движения (например, PendulumMotionModel).
+            model: Модель движения (например, ConstraintMotionModel).
             output_dir_name (str): Имя директории для сохранения результатов (относительно скрипта).
         """
 
