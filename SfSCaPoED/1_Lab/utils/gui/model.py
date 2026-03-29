@@ -14,9 +14,6 @@ _V_TOL = 1e-3
 
 
 class AppModel(QObject):
-    """
-    Модель для MVC-приложения. Управляет данными и логикой расчетов.
-    """
 
     calculationFinished = pyqtSignal(dict)
     calculationStarted = pyqtSignal()

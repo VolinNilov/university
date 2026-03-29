@@ -1,3 +1,4 @@
+# (0,4) по варианту; dt_coarse чуть крупнее 0.05 — иначе кривые Хьюна/RK4 слипаются
 DEFAULT_PARAMS = {
     "gravity": 9.81,
     "friction_coeff": 0.2,
@@ -8,7 +9,7 @@ DEFAULT_PARAMS = {
     "vy0": 0.0,
     "t_start": 0.0,
     "t_end": 5.0,
-    "dt_coarse": 0.05,
+    "dt_coarse": 0.11,
     "dt_fine": 0.005,
 }
 

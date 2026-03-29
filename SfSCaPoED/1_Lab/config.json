@@ -13,7 +13,7 @@
     "simulation": {
         "t_start": 0.0,
         "t_end": 5.0,
-        "dt_coarse": 0.05,
+        "dt_coarse": 0.11,
         "dt_fine": 0.005
     },
     "animation": {

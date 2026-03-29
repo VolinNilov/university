@@ -2,10 +2,7 @@ import numpy as np
 
 
 class ConstraintMotionModel:
-    """
-    Движение точки по связи f(x,y)=0 под действием силы тяжести (ось y вниз) и вязкого трения.
-    Связь варианта: f = 0.5·x² + y² + 0.5·xy − 4y.
-    """
+    # f = 0.5*x^2 + y^2 + 0.5*x*y - 4*y; тяжесть + вязкое трение
 
     def __init__(self, gravity=9.81, friction_coeff=0.1, mass=1.0):
         self.g = gravity
@@ -39,10 +36,6 @@ class ConstraintMotionModel:
 
     @staticmethod
     def constraint_curve_xy(num=600):
-        """
-        Дискретизация контура f=0 для отрисовки: y ∈ [0, 32/7], два ветви по x.
-        Возвращает (xs, ys) замкнутую ломаную (последняя точка совпадает с первой).
-        """
         y_max = 32.0 / 7.0
         ys_grid = np.linspace(0.0, y_max, max(4, num // 2))
         left_branch = []
@@ -71,7 +64,6 @@ class ConstraintMotionModel:
 
     @staticmethod
     def constraint_bbox(margin_ratio=0.12):
-        """Ограничивающий прямоугольник контура связи с полями."""
         xc, yc = ConstraintMotionModel.constraint_curve_xy()
         xmin, xmax = float(np.min(xc)), float(np.max(xc))
         ymin, ymax = float(np.min(yc)), float(np.max(yc))

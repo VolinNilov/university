@@ -7,7 +7,6 @@ from utils.model import ConstraintMotionModel
 
 
 class MotionAnimator:
-    """Класс для создания анимаций движения по заданной связи f(x,y)=0."""
 
     def __init__(self):
         pass
@@ -22,19 +21,6 @@ class MotionAnimator:
         save_animation=False,
         fps=30,
     ):
-        """
-        Создает и (опционально) сохраняет анимацию движения объекта.
-
-        Args:
-            t_data (np.array): Массив времени.
-            x_data (np.array): Массив координат x.
-            y_data (np.array): Массив координат y.
-            title (str): Заголовок анимации.
-            filename (str): Имя файла для сохранения анимации.
-            save_animation (bool): Флаг для сохранения анимации в файл.
-            fps (int): Кадры в секунду для сохраняемой анимации.
-        """
-
         print(f"[Animator] Создание анимации: {title}")
 
         cx, cy = ConstraintMotionModel.constraint_curve_xy()
