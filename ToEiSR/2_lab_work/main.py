@@ -32,7 +32,7 @@ class FullFactorialExperiment:
 
     # Этап 1: Генерация матрицы ПФЭ
     def generate_design_matrix(self) -> None:
-        """Генерирует матрицу полного факторного эксперимента 2^3."""
+        """Генерирует матрицу полного факторного эксперимента 2^3"""
 
         combinations = list(product(*[[-1, 1]] * 3))
         df = pd.DataFrame(combinations, columns=["X1", "X2", "X3"])
@@ -43,7 +43,7 @@ class FullFactorialExperiment:
 
     # Этап 2: Моделирование отклика
     def compute_response(self, R1: float, C1: float, L1: float) -> float:
-        """Вычисляет амплитуду отклика на R3 при заданных элементах схемы."""
+        """Вычисляет амплитуду отклика на R3 при заданных элементах схемы"""
 
         w = 2 * np.pi * self.freq
         Zc = 1 / (1j * w * C1)
@@ -55,7 +55,7 @@ class FullFactorialExperiment:
         return abs(U2)
 
     def simulate(self) -> None:
-        """Моделирует отклик Y для всех комбинаций факторов."""
+        """Моделирует отклик Y для всех комбинаций факторов"""
 
         if self.df is None:
             raise ValueError("Матрица ПФЭ не сгенерирована. Вызовите generate_design_matrix().")
@@ -63,7 +63,7 @@ class FullFactorialExperiment:
 
     # Этап 3: Построение регрессионной модели
     def build_regression_model(self) -> tuple[np.ndarray, float]:
-        """Строит регрессионную модель. Возвращает коэффициенты и свободный член."""
+        """Строит регрессионную модель. Возвращает коэффициенты и свободный член"""
 
         X = self.df[["X1", "X2", "X3"]]
         y = self.df["Y"]
@@ -73,7 +73,7 @@ class FullFactorialExperiment:
 
     # Этап 4: Анализ значимости коэффициентов
     def analyze_significance(self) -> tuple[np.ndarray, list[float]]:
-        """Вычисляет t-статистики и p-значения для коэффициентов регрессии."""
+        """Вычисляет t-статистики и p-значения для коэффициентов регрессии"""
 
         X = self.df[["X1", "X2", "X3"]].values
         y = self.df["Y"].values
@@ -89,7 +89,7 @@ class FullFactorialExperiment:
 
     # Этап 5: Проверка адекватности модели
     def f_test(self) -> float:
-        """Проверка адекватности модели по критерию Фишера. Возвращает F-статистику."""
+        """Проверка адекватности модели по критерию Фишера. Возвращает F-статистику"""
 
         X = self.df[["X1", "X2", "X3"]].values
         y = self.df["Y"].values
@@ -106,7 +106,7 @@ class FullFactorialExperiment:
 
     # Этап 6: Сохранение результатов
     def save_results_to_csv(self, filename: str = "results/experiment_results_with_explanations.csv") -> None:
-        """Сохраняет результаты с пояснениями в CSV."""
+        """Сохраняет результаты с пояснениями в CSV"""
 
         coef, intercept = self.build_regression_model()
         t_stats, p_vals = self.analyze_significance()
@@ -131,13 +131,13 @@ class FullFactorialExperiment:
         df_results.to_csv(filename, index=False)
 
     def save_design_matrix_to_csv(self, filename: str = "results/design_matrix_and_responses.csv") -> None:
-        """Сохраняет матрицу ПФЭ и отклики в CSV."""
+        """Сохраняет матрицу ПФЭ и отклики в CSV"""
 
         self.df.to_csv(filename, index=False)
 
     # Этап 7: Визуализация результатов
     def plot_results(self) -> None:
-        """Строит и сохраняет графики влияния факторов."""
+        """Строит и сохраняет графики влияния факторов"""
 
         for x in ["X1", "X2", "X3"]:
             plt.figure()
@@ -151,7 +151,7 @@ class FullFactorialExperiment:
 
     # Дополнительный этап: Сравнение истинных и предсказанных значений
     def compare_true_and_predicted(self, random_combinations: list[tuple[float, float, float]]) -> pd.DataFrame:
-        """Сравнивает истинные и предсказанные значения для случайных комбинаций факторов."""
+        """Сравнивает истинные и предсказанные значения для случайных комбинаций факторов"""
         
         results = []
         for R1, C1, L1 in random_combinations:

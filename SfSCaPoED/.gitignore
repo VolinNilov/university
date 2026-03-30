@@ -208,3 +208,6 @@ pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python,c++
 
+collect_scripts.py
+collected_scripts.txt
+data/
